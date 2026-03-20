@@ -1,0 +1,26 @@
+{
+  "skill_name": "aws-cdk-architect",
+  "evals": [
+    {
+      "id": 0,
+      "name": "serverless-api",
+      "prompt": "CDKでサーバーレスなREST APIを作りたいです。API GatewayとLambdaとDynamoDBを使って、TODOアプリのバックエンドを構築してください。CRUD操作ができるようにしてください。",
+      "expected_output": "CDKスタックのTypeScriptコード。API Gateway + Lambda + DynamoDB構成。CRUD用のエンドポイント定義、テストコード、デプロイ手順を含む。",
+      "files": []
+    },
+    {
+      "id": 1,
+      "name": "static-site-spa",
+      "prompt": "Reactで作ったSPAをAWSにデプロイするCDKスタックを書いてください。CloudFrontとS3を使って、HTTPSでアクセスできるようにしたいです。カスタムドメインは不要です。",
+      "expected_output": "S3 + CloudFront + OACのCDKスタック。SPA用の404リダイレクト設定、BucketDeployment、HTTPS強制を含む。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "complex-architecture",
+      "prompt": "以下の要件でCDKスタックを設計・実装してください。\n- Cognito認証付きのAPI\n- API Gateway + Lambda (TypeScript)\n- DynamoDBにデータ保存\n- S3にファイルアップロード機能\n- ファイルアップロード時にLambdaでサムネイル生成\n検証用なのでコスト最小で構成してください。",
+      "expected_output": "複数スタックまたはカスタムコンストラクトで整理されたCDKコード。Cognito認証、API Gateway、Lambda x2、DynamoDB、S3トリガーを含む。コスト最適化の設定あり。",
+      "files": []
+    }
+  ]
+}
