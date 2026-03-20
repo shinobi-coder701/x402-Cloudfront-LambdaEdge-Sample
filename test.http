@@ -1,0 +1,166 @@
+### x402 CloudFront + Lambda@Edge — REST Client Tests
+###
+### 使い方:
+###   1. cdk deploy 後に出力される URL を下の変数に設定する
+###   2. VS Code の REST Client 拡張 (humao.rest-client) でリクエストを送信する
+###
+### x402 支払いフロー:
+###   Step 1: 支払いなしでリクエスト → 402 + X-PAYMENT-REQUIRED ヘッダー
+###   Step 2: X-PAYMENT-REQUIRED をデコード (base64 → JSON) して支払い要件を確認
+###   Step 3: EIP-3009 で署名した支払いペイロードを Payment-Signature ヘッダーに付与して再送
+
+# ── 変数設定 ──────────────────────────────────────────────────────────────────
+# cdk deploy 後に出力される URL を設定してください
+
+# CloudFront URL（x402 支払いチェックあり）
+@cloudfrontUrl = https://XXXXX.cloudfront.net
+
+# API Gateway URL（支払いチェックなし — デバッグ用）
+@apiGatewayUrl = https://XXXXX.execute-api.us-east-1.amazonaws.com/v1
+
+# x402 支払いペイロード（署名済み）— Step 3 で使用
+# 実際の値は x402 クライアントライブラリで生成する（下部の「支払いペイロード生成方法」を参照）
+@paymentPayload = REPLACE_WITH_BASE64_ENCODED_PAYMENT_PAYLOAD
+
+
+# ════════════════════════════════════════════════════════════════════════════════
+# 【無料エンドポイント】支払い不要
+# ════════════════════════════════════════════════════════════════════════════════
+
+### ✅ GET / — ウェルカムページ（無料）
+# CloudFront 経由でも Lambda@Edge をバイパスして直接 API Gateway に転送される
+GET {{cloudfrontUrl}}/
+Accept: application/json
+
+###
+
+### ✅ GET / — API Gateway 直接（デバッグ用）
+GET {{apiGatewayUrl}}/
+Accept: application/json
+
+
+# ════════════════════════════════════════════════════════════════════════════════
+# 【Step 1】支払いなしリクエスト → 402 Payment Required
+# ════════════════════════════════════════════════════════════════════════════════
+# レスポンスの X-PAYMENT-REQUIRED ヘッダーを base64 デコードすると
+# 支払い要件 (scheme, network, amount, asset, payTo) が確認できる
+
+### 💰 GET /api/hello — $0.001 USDC (支払いなし → 402)
+# @name helloUnpaid
+GET {{cloudfrontUrl}}/api/hello
+Accept: application/json
+
+###
+
+### 💰 GET /api/premium/data — $0.01 USDC (支払いなし → 402)
+# @name premiumUnpaid
+GET {{cloudfrontUrl}}/api/premium/data
+Accept: application/json
+
+###
+
+### 💰 GET /content/article — $0.005 USDC (支払いなし → 402)
+# @name contentUnpaid
+GET {{cloudfrontUrl}}/content/article
+Accept: application/json
+
+
+# ════════════════════════════════════════════════════════════════════════════════
+# 【Step 2】不正な支払いトークン → 402 (検証エラー)
+# ════════════════════════════════════════════════════════════════════════════════
+
+### ❌ GET /api/hello — 不正な Payment-Signature (base64 不正値)
+GET {{cloudfrontUrl}}/api/hello
+Accept: application/json
+Payment-Signature: aW52YWxpZC1wYXlsb2Fk
+
+###
+
+### ❌ GET /api/hello — 不正な Payment-Signature (構造が不正なJSON)
+GET {{cloudfrontUrl}}/api/hello
+Accept: application/json
+Payment-Signature: eyJpbnZhbGlkIjoidHJ1ZSJ9
+
+
+# ════════════════════════════════════════════════════════════════════════════════
+# 【Step 3】署名済みペイロードで支払い → 200 OK
+# ════════════════════════════════════════════════════════════════════════════════
+# @paymentPayload に x402 クライアントで生成した base64 エンコード済み
+# 支払いペイロードをセットしてから実行する
+
+### ✅ GET /api/hello — Payment-Signature 付き ($0.001 USDC)
+GET {{cloudfrontUrl}}/api/hello
+Accept: application/json
+Payment-Signature: {{paymentPayload}}
+
+###
+
+### ✅ GET /api/premium/data — Payment-Signature 付き ($0.01 USDC)
+GET {{cloudfrontUrl}}/api/premium/data
+Accept: application/json
+Payment-Signature: {{paymentPayload}}
+
+###
+
+### ✅ GET /content/article — Payment-Signature 付き ($0.005 USDC)
+GET {{cloudfrontUrl}}/content/article
+Accept: application/json
+Payment-Signature: {{paymentPayload}}
+
+
+# ════════════════════════════════════════════════════════════════════════════════
+# 【デバッグ】API Gateway 直接（Lambda@Edge バイパス）
+# ════════════════════════════════════════════════════════════════════════════════
+# Lambda@Edge の支払いチェックを通さずにオリジンの動作を確認したい場合に使用
+
+### 🔧 GET /api/hello — API Gateway 直接
+GET {{apiGatewayUrl}}/api/hello
+Accept: application/json
+
+###
+
+### 🔧 GET /api/premium/data — API Gateway 直接
+GET {{apiGatewayUrl}}/api/premium/data
+Accept: application/json
+
+###
+
+### 🔧 GET /content/article — API Gateway 直接
+GET {{apiGatewayUrl}}/content/article
+Accept: application/json
+
+###
+
+### 🔧 OPTIONS /api/hello — CORS プリフライト確認
+OPTIONS {{cloudfrontUrl}}/api/hello
+Origin: http://localhost:3000
+Access-Control-Request-Method: GET
+Access-Control-Request-Headers: Payment-Signature
+
+
+# ════════════════════════════════════════════════════════════════════════════════
+# 【参考】支払いペイロード生成方法 (TypeScript)
+# ════════════════════════════════════════════════════════════════════════════════
+#
+# import { wrapFetchWithPayment } from "@x402/fetch";
+# import { x402Client } from "@x402/core/client";
+# import { ExactEvmScheme } from "@x402/evm/exact/client";
+# import { privateKeyToAccount } from "viem/accounts";
+#
+# const signer = privateKeyToAccount(process.env.EVM_PRIVATE_KEY as `0x${string}`);
+# const client = new x402Client();
+# client.register("eip155:*", new ExactEvmScheme(signer));
+#
+# const fetchWithPayment = wrapFetchWithPayment(fetch, client);
+#
+# // 自動で 402 を受け取り → 署名 → 再送してくれる
+# const res = await fetchWithPayment("https://XXXXX.cloudfront.net/api/hello");
+# const data = await res.json();
+# console.log(data);
+#
+# ────────────────────────────────────────────────────────────────────────────────
+# 必要な環境変数:
+#   EVM_PRIVATE_KEY=0x...  (Base Sepolia テストネット用のウォレット秘密鍵)
+#
+# テスト用 USDC 取得:
+#   https://faucet.circle.com/ (Base Sepolia 選択)

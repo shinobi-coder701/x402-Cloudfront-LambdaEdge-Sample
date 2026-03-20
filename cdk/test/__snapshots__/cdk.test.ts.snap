@@ -1,0 +1,1086 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CdkStack matches snapshot 1`] = `
+{
+  "Outputs": {
+    "ApiGatewayUrl": {
+      "Description": "API Gateway direct URL — useful for testing without x402 payment check",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "DemoApiE67238F8",
+            },
+            ".execute-api.us-east-1.",
+            {
+              "Ref": "AWS::URLSuffix",
+            },
+            "/",
+            {
+              "Ref": "DemoApiDeploymentStagev18E545372",
+            },
+            "/",
+          ],
+        ],
+      },
+    },
+    "CloudFrontUrl": {
+      "Description": "Entry point — all requests go through x402 Lambda@Edge for /api/* and /content/*",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Fn::GetAtt": [
+                "Distribution830FAC52",
+                "DomainName",
+              ],
+            },
+          ],
+        ],
+      },
+    },
+    "DemoApiEndpoint09F4613B": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "DemoApiE67238F8",
+            },
+            ".execute-api.us-east-1.",
+            {
+              "Ref": "AWS::URLSuffix",
+            },
+            "/",
+            {
+              "Ref": "DemoApiDeploymentStagev18E545372",
+            },
+            "/",
+          ],
+        ],
+      },
+    },
+    "FreeEndpoint": {
+      "Description": "Free welcome endpoint (no payment required)",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Fn::GetAtt": [
+                "Distribution830FAC52",
+                "DomainName",
+              ],
+            },
+            "/",
+          ],
+        ],
+      },
+    },
+    "PaidEndpointContent": {
+      "Description": "Paid endpoint — $0.005 USDC (Base Sepolia)",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Fn::GetAtt": [
+                "Distribution830FAC52",
+                "DomainName",
+              ],
+            },
+            "/content/article",
+          ],
+        ],
+      },
+    },
+    "PaidEndpointHello": {
+      "Description": "Paid endpoint — $0.001 USDC (Base Sepolia)",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Fn::GetAtt": [
+                "Distribution830FAC52",
+                "DomainName",
+              ],
+            },
+            "/api/hello",
+          ],
+        ],
+      },
+    },
+    "PaidEndpointPremium": {
+      "Description": "Paid endpoint — $0.01 USDC (Base Sepolia)",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Fn::GetAtt": [
+                "Distribution830FAC52",
+                "DomainName",
+              ],
+            },
+            "/api/premium/data",
+          ],
+        ],
+      },
+    },
+  },
+  "Parameters": {
+    "BootstrapVersion": {
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "DemoApiANY763322F2": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "DemoFunctionF0F3B7EA",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Fn::GetAtt": [
+            "DemoApiE67238F8",
+            "RootResourceId",
+          ],
+        },
+        "RestApiId": {
+          "Ref": "DemoApiE67238F8",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "DemoApiANYApiPermissionTestStackDemoApiC46E895EANY61526C92": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "DemoFunctionF0F3B7EA",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:us-east-1:123456789012:",
+              {
+                "Ref": "DemoApiE67238F8",
+              },
+              "/",
+              {
+                "Ref": "DemoApiDeploymentStagev18E545372",
+              },
+              "/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "DemoApiANYApiPermissionTestTestStackDemoApiC46E895EANY9359FAE9": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "DemoFunctionF0F3B7EA",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:us-east-1:123456789012:",
+              {
+                "Ref": "DemoApiE67238F8",
+              },
+              "/test-invoke-stage/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "DemoApiAccount51051FE0": {
+      "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "DemoApiE67238F8",
+      ],
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "DemoApiCloudWatchRoleF95A0D8F",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "DemoApiCloudWatchRoleF95A0D8F": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "Network",
+            "Value": "eip155:84532",
+          },
+          {
+            "Key": "Project",
+            "Value": "x402-cloudfront-demo",
+          },
+          {
+            "Key": "Protocol",
+            "Value": "x402",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "DemoApiDeploymentFD72319Ae65597d5fe2c84d11d4d2e8bd36851c1": {
+      "DependsOn": [
+        "DemoApiproxyANYA3F9BB50",
+        "DemoApiproxyOPTIONS9F8F0504",
+        "DemoApiproxy0845A4FE",
+        "DemoApiANY763322F2",
+        "DemoApiOPTIONSEA63C3A0",
+      ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
+      "Properties": {
+        "Description": "x402 demo stage",
+        "RestApiId": {
+          "Ref": "DemoApiE67238F8",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "DemoApiDeploymentStagev18E545372": {
+      "DependsOn": [
+        "DemoApiAccount51051FE0",
+      ],
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "DemoApiDeploymentFD72319Ae65597d5fe2c84d11d4d2e8bd36851c1",
+        },
+        "Description": "x402 demo stage",
+        "RestApiId": {
+          "Ref": "DemoApiE67238F8",
+        },
+        "StageName": "v1",
+        "Tags": [
+          {
+            "Key": "Network",
+            "Value": "eip155:84532",
+          },
+          {
+            "Key": "Project",
+            "Value": "x402-cloudfront-demo",
+          },
+          {
+            "Key": "Protocol",
+            "Value": "x402",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "DemoApiE67238F8": {
+      "Properties": {
+        "Description": "x402 Demo API — origin for CloudFront distribution",
+        "Name": "DemoApi",
+        "Tags": [
+          {
+            "Key": "Network",
+            "Value": "eip155:84532",
+          },
+          {
+            "Key": "Project",
+            "Value": "x402-cloudfront-demo",
+          },
+          {
+            "Key": "Protocol",
+            "Value": "x402",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "DemoApiOPTIONSEA63C3A0": {
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "OPTIONS",
+        "Integration": {
+          "IntegrationResponses": [
+            {
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Payment-Signature,X-Payment-Response'",
+                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'",
+                "method.response.header.Access-Control-Allow-Origin": "'*'",
+              },
+              "StatusCode": "204",
+            },
+          ],
+          "RequestTemplates": {
+            "application/json": "{ statusCode: 200 }",
+          },
+          "Type": "MOCK",
+        },
+        "MethodResponses": [
+          {
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Headers": true,
+              "method.response.header.Access-Control-Allow-Methods": true,
+              "method.response.header.Access-Control-Allow-Origin": true,
+            },
+            "StatusCode": "204",
+          },
+        ],
+        "ResourceId": {
+          "Fn::GetAtt": [
+            "DemoApiE67238F8",
+            "RootResourceId",
+          ],
+        },
+        "RestApiId": {
+          "Ref": "DemoApiE67238F8",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "DemoApiproxy0845A4FE": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "DemoApiE67238F8",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "{proxy+}",
+        "RestApiId": {
+          "Ref": "DemoApiE67238F8",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "DemoApiproxyANYA3F9BB50": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "DemoFunctionF0F3B7EA",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "DemoApiproxy0845A4FE",
+        },
+        "RestApiId": {
+          "Ref": "DemoApiE67238F8",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "DemoApiproxyANYApiPermissionTestStackDemoApiC46E895EANYproxy8C900016": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "DemoFunctionF0F3B7EA",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:us-east-1:123456789012:",
+              {
+                "Ref": "DemoApiE67238F8",
+              },
+              "/",
+              {
+                "Ref": "DemoApiDeploymentStagev18E545372",
+              },
+              "/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "DemoApiproxyANYApiPermissionTestTestStackDemoApiC46E895EANYproxy4096183D": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "DemoFunctionF0F3B7EA",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:us-east-1:123456789012:",
+              {
+                "Ref": "DemoApiE67238F8",
+              },
+              "/test-invoke-stage/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "DemoApiproxyOPTIONS9F8F0504": {
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "OPTIONS",
+        "Integration": {
+          "IntegrationResponses": [
+            {
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Payment-Signature,X-Payment-Response'",
+                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'",
+                "method.response.header.Access-Control-Allow-Origin": "'*'",
+              },
+              "StatusCode": "204",
+            },
+          ],
+          "RequestTemplates": {
+            "application/json": "{ statusCode: 200 }",
+          },
+          "Type": "MOCK",
+        },
+        "MethodResponses": [
+          {
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Headers": true,
+              "method.response.header.Access-Control-Allow-Methods": true,
+              "method.response.header.Access-Control-Allow-Origin": true,
+            },
+            "StatusCode": "204",
+          },
+        ],
+        "ResourceId": {
+          "Ref": "DemoApiproxy0845A4FE",
+        },
+        "RestApiId": {
+          "Ref": "DemoApiE67238F8",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "DemoFunctionF0F3B7EA": {
+      "DependsOn": [
+        "DemoFunctionServiceRoleD5AC30C0",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-123456789012-us-east-1",
+          "S3Key": "bec52f60b315c74be2fe40e9272e863bfa4d18c66a2d8eec394ef02877e4aa5a.zip",
+        },
+        "Description": "x402 demo origin — free and paid endpoints",
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "DemoFunctionServiceRoleD5AC30C0",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "Network",
+            "Value": "eip155:84532",
+          },
+          {
+            "Key": "Project",
+            "Value": "x402-cloudfront-demo",
+          },
+          {
+            "Key": "Protocol",
+            "Value": "x402",
+          },
+        ],
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "DemoFunctionServiceRoleD5AC30C0": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "Network",
+            "Value": "eip155:84532",
+          },
+          {
+            "Key": "Project",
+            "Value": "x402-cloudfront-demo",
+          },
+          {
+            "Key": "Protocol",
+            "Value": "x402",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "Distribution830FAC52": {
+      "Properties": {
+        "DistributionConfig": {
+          "CacheBehaviors": [
+            {
+              "AllowedMethods": [
+                "GET",
+                "HEAD",
+                "OPTIONS",
+                "PUT",
+                "PATCH",
+                "POST",
+                "DELETE",
+              ],
+              "CachePolicyId": {
+                "Ref": "NoCachePolicy1F71EC46",
+              },
+              "Compress": true,
+              "LambdaFunctionAssociations": [
+                {
+                  "EventType": "origin-request",
+                  "IncludeBody": false,
+                  "LambdaFunctionARN": {
+                    "Ref": "OriginRequestFnCurrentVersionA6BCB5E6af147672bfe9f89bbe5cdcf4bcf22eb5",
+                  },
+                },
+                {
+                  "EventType": "origin-response",
+                  "LambdaFunctionARN": {
+                    "Ref": "OriginResponseFnCurrentVersion56520FFB6e90a949867ae5588efb3b1c555b1c3b",
+                  },
+                },
+              ],
+              "OriginRequestPolicyId": {
+                "Ref": "PaymentOriginPolicy64D7BBE0",
+              },
+              "PathPattern": "/api/*",
+              "TargetOriginId": "TestStackDistributionOrigin1B0A090BF",
+              "ViewerProtocolPolicy": "redirect-to-https",
+            },
+            {
+              "AllowedMethods": [
+                "GET",
+                "HEAD",
+                "OPTIONS",
+                "PUT",
+                "PATCH",
+                "POST",
+                "DELETE",
+              ],
+              "CachePolicyId": {
+                "Ref": "NoCachePolicy1F71EC46",
+              },
+              "Compress": true,
+              "LambdaFunctionAssociations": [
+                {
+                  "EventType": "origin-request",
+                  "IncludeBody": false,
+                  "LambdaFunctionARN": {
+                    "Ref": "OriginRequestFnCurrentVersionA6BCB5E6af147672bfe9f89bbe5cdcf4bcf22eb5",
+                  },
+                },
+                {
+                  "EventType": "origin-response",
+                  "LambdaFunctionARN": {
+                    "Ref": "OriginResponseFnCurrentVersion56520FFB6e90a949867ae5588efb3b1c555b1c3b",
+                  },
+                },
+              ],
+              "OriginRequestPolicyId": {
+                "Ref": "PaymentOriginPolicy64D7BBE0",
+              },
+              "PathPattern": "/content/*",
+              "TargetOriginId": "TestStackDistributionOrigin1B0A090BF",
+              "ViewerProtocolPolicy": "redirect-to-https",
+            },
+          ],
+          "Comment": "x402 Demo — CloudFront + Lambda@Edge payment gateway",
+          "DefaultCacheBehavior": {
+            "AllowedMethods": [
+              "GET",
+              "HEAD",
+              "OPTIONS",
+              "PUT",
+              "PATCH",
+              "POST",
+              "DELETE",
+            ],
+            "CachePolicyId": {
+              "Ref": "NoCachePolicy1F71EC46",
+            },
+            "Compress": true,
+            "OriginRequestPolicyId": {
+              "Ref": "PaymentOriginPolicy64D7BBE0",
+            },
+            "TargetOriginId": "TestStackDistributionOrigin1B0A090BF",
+            "ViewerProtocolPolicy": "redirect-to-https",
+          },
+          "Enabled": true,
+          "HttpVersion": "http2",
+          "IPV6Enabled": true,
+          "Origins": [
+            {
+              "CustomOriginConfig": {
+                "OriginProtocolPolicy": "https-only",
+                "OriginSSLProtocols": [
+                  "TLSv1.2",
+                ],
+              },
+              "DomainName": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Ref": "DemoApiE67238F8",
+                    },
+                    ".execute-api.us-east-1.amazonaws.com",
+                  ],
+                ],
+              },
+              "Id": "TestStackDistributionOrigin1B0A090BF",
+              "OriginPath": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "/",
+                    {
+                      "Ref": "DemoApiDeploymentStagev18E545372",
+                    },
+                  ],
+                ],
+              },
+            },
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "Network",
+            "Value": "eip155:84532",
+          },
+          {
+            "Key": "Project",
+            "Value": "x402-cloudfront-demo",
+          },
+          {
+            "Key": "Protocol",
+            "Value": "x402",
+          },
+        ],
+      },
+      "Type": "AWS::CloudFront::Distribution",
+    },
+    "NoCachePolicy1F71EC46": {
+      "Properties": {
+        "CachePolicyConfig": {
+          "DefaultTTL": 0,
+          "MaxTTL": 0,
+          "MinTTL": 0,
+          "Name": "TestStackNoCachePolicyE224BB18-us-east-1",
+          "ParametersInCacheKeyAndForwardedToOrigin": {
+            "CookiesConfig": {
+              "CookieBehavior": "none",
+            },
+            "EnableAcceptEncodingBrotli": false,
+            "EnableAcceptEncodingGzip": false,
+            "HeadersConfig": {
+              "HeaderBehavior": "none",
+            },
+            "QueryStringsConfig": {
+              "QueryStringBehavior": "all",
+            },
+          },
+        },
+      },
+      "Type": "AWS::CloudFront::CachePolicy",
+    },
+    "OriginRequestFn5947795F": {
+      "DependsOn": [
+        "OriginRequestFnServiceRoleB13CD866",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-123456789012-us-east-1",
+          "S3Key": "a8def1a47fcc157616915dc7660e41652d7e8c0c258e86ae274e0bfd850ed869.zip",
+        },
+        "Description": "x402 origin-request: verify payment before forwarding to origin",
+        "Handler": "index.originRequestHandler",
+        "MemorySize": 128,
+        "Role": {
+          "Fn::GetAtt": [
+            "OriginRequestFnServiceRoleB13CD866",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "Network",
+            "Value": "eip155:84532",
+          },
+          {
+            "Key": "Project",
+            "Value": "x402-cloudfront-demo",
+          },
+          {
+            "Key": "Protocol",
+            "Value": "x402",
+          },
+        ],
+        "Timeout": 20,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "OriginRequestFnCurrentVersionA6BCB5E6af147672bfe9f89bbe5cdcf4bcf22eb5": {
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
+      "Properties": {
+        "FunctionName": {
+          "Ref": "OriginRequestFn5947795F",
+        },
+      },
+      "Type": "AWS::Lambda::Version",
+    },
+    "OriginRequestFnServiceRoleB13CD866": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "edgelambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "Network",
+            "Value": "eip155:84532",
+          },
+          {
+            "Key": "Project",
+            "Value": "x402-cloudfront-demo",
+          },
+          {
+            "Key": "Protocol",
+            "Value": "x402",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "OriginResponseFn0BEDF56E": {
+      "DependsOn": [
+        "OriginResponseFnServiceRoleD61CFFF4",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-123456789012-us-east-1",
+          "S3Key": "a8def1a47fcc157616915dc7660e41652d7e8c0c258e86ae274e0bfd850ed869.zip",
+        },
+        "Description": "x402 origin-response: settle payment after origin succeeds",
+        "Handler": "index.originResponseHandler",
+        "MemorySize": 128,
+        "Role": {
+          "Fn::GetAtt": [
+            "OriginResponseFnServiceRoleD61CFFF4",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "Network",
+            "Value": "eip155:84532",
+          },
+          {
+            "Key": "Project",
+            "Value": "x402-cloudfront-demo",
+          },
+          {
+            "Key": "Protocol",
+            "Value": "x402",
+          },
+        ],
+        "Timeout": 20,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "OriginResponseFnCurrentVersion56520FFB6e90a949867ae5588efb3b1c555b1c3b": {
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
+      "Properties": {
+        "FunctionName": {
+          "Ref": "OriginResponseFn0BEDF56E",
+        },
+      },
+      "Type": "AWS::Lambda::Version",
+    },
+    "OriginResponseFnServiceRoleD61CFFF4": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "edgelambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "Network",
+            "Value": "eip155:84532",
+          },
+          {
+            "Key": "Project",
+            "Value": "x402-cloudfront-demo",
+          },
+          {
+            "Key": "Protocol",
+            "Value": "x402",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "PaymentOriginPolicy64D7BBE0": {
+      "Properties": {
+        "OriginRequestPolicyConfig": {
+          "CookiesConfig": {
+            "CookieBehavior": "none",
+          },
+          "HeadersConfig": {
+            "HeaderBehavior": "whitelist",
+            "Headers": [
+              "Payment-Signature",
+              "Content-Type",
+              "Accept",
+            ],
+          },
+          "Name": "TestStackPaymentOriginPolicy743F8753",
+          "QueryStringsConfig": {
+            "QueryStringBehavior": "all",
+          },
+        },
+      },
+      "Type": "AWS::CloudFront::OriginRequestPolicy",
+    },
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                  ],
+                  {
+                    "Ref": "BootstrapVersion",
+                  },
+                ],
+              },
+            ],
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI.",
+        },
+      ],
+    },
+  },
+}
+`;

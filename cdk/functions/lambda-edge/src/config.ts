@@ -1,44 +1,54 @@
 /**
  * x402 Configuration
- * 
- * Customize these values for your deployment.
- * Lambda@Edge doesn't support environment variables, so config is bundled.
+ *
+ * Values are injected at bundle time via esbuild --define flags by the CDK stack.
+ * Lambda@Edge does NOT support environment variables, so config is baked in at build time.
+ *
+ * Set the following environment variables before running `cdk deploy`:
+ *   PAY_TO_ADDRESS  — wallet address to receive payments (required)
+ *   X402_NETWORK    — CAIP-2 network ID (default: eip155:84532 = Base Sepolia)
+ *   FACILITATOR_URL — x402 facilitator URL (default: https://x402.org/facilitator)
  */
 
-import type { RoutesConfig } from '@x402/core/server';
+import type { RoutesConfig } from "@x402/core/server";
 
-// Payment configuration
-export const FACILITATOR_URL = 'https://x402.org/facilitator';
-export const PAY_TO = '0xYourPaymentAddressHere';
-export const NETWORK = 'eip155:84532'; // Base Sepolia testnet
+// These constants are replaced by esbuild --define at bundle time.
+// CDK reads the env vars at synth time and injects the values here.
+declare const __PAY_TO_ADDRESS__: string;
+declare const __X402_NETWORK__: string;
+declare const __FACILITATOR_URL__: string;
 
-// Route configuration
+export const FACILITATOR_URL: string = __FACILITATOR_URL__;
+export const PAY_TO: string = __PAY_TO_ADDRESS__;
+export const NETWORK: string = __X402_NETWORK__;
+
+// Route configuration — which paths require payment and at what price
 export const ROUTES: RoutesConfig = {
-  '/api/*': {
-    accepts: {
-      scheme: 'exact',
-      network: NETWORK,
-      payTo: PAY_TO,
-      price: '$0.001',
-    },
-    description: 'API access',
-  },
-  '/api/premium/**': {
-    accepts: {
-      scheme: 'exact',
-      network: NETWORK,
-      payTo: PAY_TO,
-      price: '$0.01',
-    },
-    description: 'Premium API access',
-  },
-  '/content/**': {
-    accepts: {
-      scheme: 'exact',
-      network: NETWORK,
-      payTo: PAY_TO,
-      price: '$0.005',
-    },
-    description: 'Premium content',
-  },
+	"/api/*": {
+		accepts: {
+			scheme: "exact",
+			network: NETWORK,
+			payTo: PAY_TO,
+			price: "$0.001",
+		},
+		description: "API access ($0.001 USDC)",
+	},
+	"/api/premium/**": {
+		accepts: {
+			scheme: "exact",
+			network: NETWORK,
+			payTo: PAY_TO,
+			price: "$0.01",
+		},
+		description: "Premium API access ($0.01 USDC)",
+	},
+	"/content/**": {
+		accepts: {
+			scheme: "exact",
+			network: NETWORK,
+			payTo: PAY_TO,
+			price: "$0.005",
+		},
+		description: "Premium content ($0.005 USDC)",
+	},
 };
