@@ -1,0 +1,2 @@
+# x402-Cloudfront-LambdaEdge-Sample
+x402とCloudFrontとLambdaEdgeを試すのサンプルコード
