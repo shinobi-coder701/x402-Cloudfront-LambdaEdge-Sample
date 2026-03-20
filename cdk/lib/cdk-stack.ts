@@ -192,7 +192,8 @@ export class CdkStack extends cdk.Stack {
 			defaultTtl: cdk.Duration.seconds(0),
 			minTtl: cdk.Duration.seconds(0),
 			maxTtl: cdk.Duration.seconds(0),
-			queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
+			// QueryStringBehavior cannot be set when caching is disabled (all TTLs = 0).
+			// Query string forwarding to origin is handled by paymentOriginPolicy instead.
 			cookieBehavior: cloudfront.CacheCookieBehavior.none(),
 		});
 
