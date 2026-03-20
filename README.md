@@ -13,6 +13,7 @@
 - [シーケンス図](#シーケンス図)
 - [技術スタック](#技術スタック)
 - [動かし方](#動かし方)
+- [テストスクリプト](#8-テストスクリプトscripts)
 - [エンドポイント一覧](#エンドポイント一覧)
 - [参考文献](#参考文献)
 
@@ -394,6 +395,131 @@ npx cdk diff
 
 ```bash
 npx cdk destroy
+```
+
+---
+
+### 8. テストスクリプト（scripts/）
+
+`scripts/` には、x402 支払いペイロードの生成と動作検証を行うスクリプトが含まれています。
+`test.http`（VS Code REST Client）と組み合わせた手動テストや、フル支払いフローの確認に使用してください。
+
+#### セットアップ
+
+```bash
+# 環境変数ファイルを作成
+cp scripts/.env.example scripts/.env
+```
+
+`scripts/.env` を編集して2つの値を設定します：
+
+```dotenv
+# Base Sepolia テストネット用ウォレットの秘密鍵
+EVM_PRIVATE_KEY=0x_YOUR_PRIVATE_KEY_HERE
+
+# cdk deploy 後に出力される CloudFrontUrl
+CLOUDFRONT_URL=https://XXXXX.cloudfront.net
+```
+
+```bash
+# 依存パッケージをインストール
+cd scripts && bun install
+```
+
+> **テスト用 USDC の取得**
+> [Circle Faucet](https://faucet.circle.com/) で「Base Sepolia」を選択して USDC を取得してください。
+
+---
+
+#### generate モード — 署名済みペイロードを生成（決済なし）
+
+`test.http` の `@paymentPayload` に貼り付ける値を生成します。実際のオンチェーン決済は行いません。
+
+```bash
+cd scripts
+
+bun run generate                  # /api/hello のペイロードを生成
+bun run generate:premium          # /api/premium/data のペイロードを生成
+bun run generate:content          # /content/article のペイロードを生成
+
+# または直接実行
+bun run generate-payment.ts /api/hello
+```
+
+**出力例：**
+
+```
+x402 Payment Script
+Mode:     ペイロード生成のみ (デフォルト)
+Endpoint: /api/hello
+
+────────────────────────────────────────────────────
+Step 1: 支払いなしでリクエスト → 402 Payment Required
+────────────────────────────────────────────────────
+Status: 402 Payment Required
+
+Payment Requirements:
+  Network :  eip155:84532
+  Price   :  $0.001000 USDC
+  Pay To  :  0xYourPaymentAddressHere
+
+────────────────────────────────────────────────────
+Step 2: 支払いペイロードを署名生成（オンチェーン決済はしない）
+────────────────────────────────────────────────────
+Wallet:  0xYourWalletAddress
+Balance: 1.234567 USDC (Base Sepolia)
+
+════════════════════════════════════════════════════
+生成された Payment-Signature (test.http の @paymentPayload に貼り付け):
+════════════════════════════════════════════════════
+eyJwYXlsb2FkIjp7InNjaGVtZSI6ImV4YWN0IiwibmV0d29yayI6...（base64）
+════════════════════════════════════════════════════
+
+注意: このシグネチャはリプレイ保護により 1 回限り有効です。
+```
+
+生成された値を `test.http` に貼り付けます：
+
+```http
+@paymentPayload = eyJwYXlsb2FkIjp7InNjaGVtZSI6ImV4YWN0IiwibmV0d29yayI6...
+```
+
+---
+
+#### pay モード — フル支払い（実際に USDC を消費）
+
+402 取得 → 署名 → 再送 → オリジンからレスポンス取得の完全なフローを実行します。
+
+```bash
+cd scripts
+
+bun run pay                       # /api/hello を支払い
+bun run pay:premium               # /api/premium/data を支払い
+bun run pay:content               # /content/article を支払い
+
+# または直接実行
+bun run generate-payment.ts /api/hello --pay
+```
+
+**出力例：**
+
+```
+Step 2 + 3: 支払い → オリジンからレスポンス取得
+Balance (before): 1.234567 USDC
+
+Status: 200 OK
+Response: {
+  "message": "Hello from the paid endpoint!",
+  "endpoint": "/api/hello",
+  ...
+}
+
+Balance (after): 1.233567 USDC
+Spent: $0.001000 USDC
+
+════════════════════════════════════
+支払い完了!
+════════════════════════════════════
 ```
 
 ---

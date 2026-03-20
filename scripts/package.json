@@ -18,5 +18,8 @@
     "@x402/fetch": "2.2.0",
     "dotenv": "^17.3.1",
     "viem": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0"
   }
 }

@@ -23,15 +23,15 @@
  *   bun run pay               # /api/hello フル支払い
  */
 
-import { wrapFetchWithPayment } from "@x402/fetch";
 import { x402Client } from "@x402/core/client";
 import { ExactEvmScheme } from "@x402/evm/exact/client";
-import { privateKeyToAccount } from "viem/accounts";
-import { createPublicClient, erc20Abi, http } from "viem";
-import { baseSepolia } from "viem/chains";
+import { wrapFetchWithPayment } from "@x402/fetch";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
+import { createPublicClient, erc20Abi, http } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+import { baseSepolia } from "viem/chains";
 
 // スクリプトと同じディレクトリの .env を読み込む
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -66,11 +66,14 @@ const targetUrl = `${cloudfrontUrl}${endpoint}`;
 // ── x402 クライアント初期化 ────────────────────────────────────────────────────
 const signer = privateKeyToAccount(privateKey);
 const x402 = new x402Client();
+// EVM 署名スキームを登録（全ての eip155 ネットワークに対応）
 x402.register("eip155:*", new ExactEvmScheme(signer));
 
 // ── ヘルパー関数 ──────────────────────────────────────────────────────────────
 
-/** Base Sepolia の USDC 残高を取得 */
+/**
+ * Base Sepolia の USDC 残高を取得するメソッド
+ */
 async function getUsdcBalance(): Promise<number | null> {
   try {
     const publicClient = createPublicClient({
@@ -89,7 +92,9 @@ async function getUsdcBalance(): Promise<number | null> {
   }
 }
 
-/** X-PAYMENT-REQUIRED ヘッダーを base64 デコードして表示 */
+/**
+ * X-PAYMENT-REQUIRED ヘッダーを base64 デコードして表示するメソッド
+ */
 function printPaymentRequirements(header: string): void {
   try {
     const requirements = JSON.parse(
@@ -111,7 +116,10 @@ function printPaymentRequirements(header: string): void {
   }
 }
 
-// ── Step 1: 402 レスポンスを確認 ──────────────────────────────────────────────
+/**
+ * ── Step 1: 402 レスポンスを確認 ──────────────────────────────────────────────
+ * @returns 
+ */
 async function step1_showPaymentRequired(): Promise<boolean> {
   console.log("\n" + LINE);
   console.log("Step 1: 支払いなしでリクエスト → 402 Payment Required");
@@ -128,9 +136,11 @@ async function step1_showPaymentRequired(): Promise<boolean> {
     return false;
   }
 
+  // 402 レスポンスから支払い要件を取得して表示
   const paymentHeader = res.headers.get("x-payment-required");
   if (paymentHeader) {
     console.log("\nPayment Requirements:");
+    // ヘッダーは base64 エンコードされているのでデコードして表示
     printPaymentRequirements(paymentHeader);
   } else {
     console.log("⚠️  X-PAYMENT-REQUIRED ヘッダーが見つかりませんでした。");
@@ -139,8 +149,11 @@ async function step1_showPaymentRequired(): Promise<boolean> {
   return true;
 }
 
-// ── モード A: ペイロード生成のみ（決済なし）────────────────────────────────────
+/**
+ * ── モード A: ペイロード生成のみ（決済なし）────────────────────────────────────
+ */
 async function generatePayloadOnly(): Promise<void> {
+  // 402 を取得して支払い要件を表示
   const has402 = await step1_showPaymentRequired();
   if (!has402) process.exit(1);
 
@@ -148,7 +161,7 @@ async function generatePayloadOnly(): Promise<void> {
   console.log("Step 2: 支払いペイロードを署名生成（オンチェーン決済はしない）");
   console.log(LINE);
   console.log("Wallet: " + signer.address);
-
+  // USDC 残高を表示（残高不足の警告も）
   const balance = await getUsdcBalance();
   if (balance !== null) {
     console.log("Balance: " + balance.toFixed(6) + " USDC (Base Sepolia)");
@@ -175,7 +188,9 @@ async function generatePayloadOnly(): Promise<void> {
     input: RequestInfo | URL,
     init?: RequestInit,
   ): Promise<Response> => {
+    // ヘッダーから Payment-Signature を取得（大文字小文字の両方に対応）
     const headers = (init?.headers ?? {}) as Record<string, string>;
+    // ヘッダー名はサーバー実装により異なる可能性があるため、両方のケースをチェック
     const sig =
       headers["Payment-Signature"] ?? headers["payment-signature"] ?? null;
 
@@ -191,11 +206,13 @@ async function generatePayloadOnly(): Promise<void> {
     return fetch(input, init);
   };
 
+  // x402 クライアントと fetch をラップして支払いペイロードを生成
   const fetchWithPayment = wrapFetchWithPayment(
     interceptFetch as typeof fetch,
     x402,
   );
 
+  // 402 をトリガーしてペイロードを生成 → シグネチャをキャプチャ
   await fetchWithPayment(targetUrl);
 
   if (!capturedSignature) {
@@ -213,8 +230,11 @@ async function generatePayloadOnly(): Promise<void> {
   );
 }
 
-// ── モード B: フル支払い（実際に USDC を消費）────────────────────────────────
+/**
+ * ── モード B: フル支払い（実際に USDC を消費）────────────────────────────────
+ */
 async function fullPayment(): Promise<void> {
+  // 402 を取得して支払い要件を表示
   const has402 = await step1_showPaymentRequired();
   if (!has402) process.exit(1);
 
@@ -222,18 +242,19 @@ async function fullPayment(): Promise<void> {
   console.log("Step 2 + 3: 支払い → オリジンからレスポンス取得");
   console.log(LINE);
   console.log("Wallet: " + signer.address);
-
+  // USDC 残高を表示（残高不足の警告も）
   const balanceBefore = await getUsdcBalance();
   if (balanceBefore !== null) {
     console.log("Balance (before): " + balanceBefore.toFixed(6) + " USDC");
   }
 
   console.log("\n支払い中...");
+  // x402 クライアントと fetch をラップして支払いペイロードを生成 → 署名 → 決済 → 再送 → オリジンからレスポンスを取得
   const fetchWithPayment = wrapFetchWithPayment(fetch, x402);
   const response = await fetchWithPayment(targetUrl);
 
   console.log("\nStatus: " + response.status + " " + response.statusText);
-
+  // レスポンスボディをテキストで取得して表示（JSON なら整形して表示）
   const bodyText = await response.text();
   try {
     console.log("Response:", JSON.stringify(JSON.parse(bodyText), null, 2));
