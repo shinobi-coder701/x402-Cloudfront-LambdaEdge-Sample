@@ -496,31 +496,95 @@ cd scripts
 bun run pay                       # /api/hello を支払い
 bun run pay:premium               # /api/premium/data を支払い
 bun run pay:content               # /content/article を支払い
-
-# または直接実行
-bun run generate-payment.ts /api/hello --pay
 ```
 
 **出力例：**
 
-```
+```bash
+x402 Payment Script
+Mode:     フル支払い (--pay) ※ 実際に USDC を消費します
+Endpoint: /api/hello
+
+────────────────────────────────────────────────────────────
+Step 1: 支払いなしでリクエスト → 402 Payment Required
+────────────────────────────────────────────────────────────
+URL: https://d7fozeailth4i.cloudfront.net/api/hello
+
+Status: 402 Payment Required
+
+Payment Requirements:
+  Network :  eip155:84532
+  Price   :  $0.001000 USDC
+  Pay To  :  0xe6AA1B60c4EC760668dB3C06d7A894c5Fd39D0aa
+  Asset   :  0x036CbD53842c5426634e7929541eC2318f3dCF7e
+
+────────────────────────────────────────────────────────────
 Step 2 + 3: 支払い → オリジンからレスポンス取得
-Balance (before): 1.234567 USDC
+────────────────────────────────────────────────────────────
+Wallet: 0xe6AA1B60c4EC760668dB3C06d7A894c5Fd39D0aa
+Balance (before): 60.000000 USDC
+
+支払い中...
 
 Status: 200 OK
 Response: {
   "message": "Hello from the paid endpoint!",
-  "endpoint": "/api/hello",
-  ...
+  "data": {
+    "greeting": "You successfully paid $0.001 USDC to access this content.",
+    "timestamp": "2026-03-20T15:52:20.237Z",
+    "network": "Base Sepolia",
+    "protocol": "x402 v2"
+  }
 }
 
-Balance (after): 1.233567 USDC
-Spent: $0.001000 USDC
+Balance (after): 60.000000 USDC
 
-════════════════════════════════════
+════════════════════════════════════════════════════════════
 支払い完了!
-════════════════════════════════════
+════════════════════════════════════════════════════════════
 ```
+
+```bash
+────────────────────────────────────────────────────────────
+Step 1: 支払いなしでリクエスト → 402 Payment Required
+────────────────────────────────────────────────────────────
+URL: https://d7fozeailth4i.cloudfront.net/content/article
+
+Status: 402 Payment Required
+
+Payment Requirements:
+  Network :  eip155:84532
+  Price   :  $0.005000 USDC
+  Pay To  :  0xe6AA1B60c4EC760668dB3C06d7A894c5Fd39D0aa
+  Asset   :  0x036CbD53842c5426634e7929541eC2318f3dCF7e
+
+────────────────────────────────────────────────────────────
+Step 2 + 3: 支払い → オリジンからレスポンス取得
+────────────────────────────────────────────────────────────
+Wallet: 0xe6AA1B60c4EC760668dB3C06d7A894c5Fd39D0aa
+Balance (before): 60.000000 USDC
+
+支払い中...
+
+Status: 200 OK
+Response: {
+  "title": "The Future of AI Micropayments",
+  "content": "x402 enables AI agents to autonomously pay for APIs using USDC on Base. No accounts, no API keys — just cryptographic payment proofs verified on-chain.",
+  "author": "x402 Demo",
+  "publishedAt": "2026-01-01",
+  "readTime": "2 min"
+}
+
+Balance (after): 60.000000 USDC
+
+════════════════════════════════════════════════════════════
+支払い完了!
+════════════════════════════════════════════════════════════
+```
+
+[実際に送金されたトランザクション](https://sepolia.basescan.org/tx/0x2236d96d357499bfdb896ec9d19aa1ea99a9b94fe460c89bc56e4885dd349a8a)
+
+[実際に送金されたトランザクション - コンテンツ](https://sepolia.basescan.org/tx/0x59be0a685b6dc22013e1620b71c5d740bfddeee6131410b2d8d80e93855039da)
 
 ---
 

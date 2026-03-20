@@ -137,7 +137,10 @@ async function step1_showPaymentRequired(): Promise<boolean> {
   }
 
   // 402 レスポンスから支払い要件を取得して表示
-  const paymentHeader = res.headers.get("x-payment-required");
+  // Lambda@Edge は x402 core の PAYMENT-REQUIRED ヘッダーを payment-required として転送する
+  const paymentHeader =
+    res.headers.get("payment-required") ??
+    res.headers.get("x-payment-required");
   if (paymentHeader) {
     console.log("\nPayment Requirements:");
     // ヘッダーは base64 エンコードされているのでデコードして表示

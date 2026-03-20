@@ -1,6 +1,6 @@
 import type {
-	APIGatewayProxyEventV2,
-	APIGatewayProxyResultV2,
+	APIGatewayProxyEvent,
+	APIGatewayProxyResult,
 } from "aws-lambda";
 
 /**
@@ -13,12 +13,15 @@ import type {
  *   GET /api/hello        — $0.001 USDC
  *   GET /api/premium/data — $0.01  USDC
  *   GET /content/article  — $0.005 USDC
+ *
+ * Note: Uses V1 REST API event format (APIGatewayProxyEvent) because the CDK
+ * stack uses LambdaRestApi, which sends the V1 proxy event format.
  */
 export const handler = async (
-	event: APIGatewayProxyEventV2,
-): Promise<APIGatewayProxyResultV2> => {
-	const path = event.rawPath ?? "/";
-	const method = event.requestContext.http.method;
+	event: APIGatewayProxyEvent,
+): Promise<APIGatewayProxyResult> => {
+	const path = event.path ?? "/";
+	const method = event.httpMethod;
 
 	// CORS preflight
 	if (method === "OPTIONS") {
@@ -103,7 +106,7 @@ export const handler = async (
  * @param body レスポンスボディ
  * @returns APIGatewayProxyResultV2
  */
-function cors(statusCode: number, body: unknown): APIGatewayProxyResultV2 {
+function cors(statusCode: number, body: unknown): APIGatewayProxyResult {
 	return {
 		statusCode,
 		headers: {
