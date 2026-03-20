@@ -314,6 +314,60 @@ const data = await res.json();
 console.log(data); // { message: "Hello from the paid endpoint!", ... }
 ```
 
+#### 実行結果例
+
+```json
+{
+  "x402Version": 2,
+  "error": "Payment required",
+  "resource": {
+    "url": "https://<固有値>.cloudfront.net/api/premium/data",
+    "description": "API access ($0.001 USDC)",
+    "mimeType": ""
+  },
+  "accepts": [
+    {
+      "scheme": "exact",
+      "network": "eip155:84532",
+      "amount": "1000",
+      "asset": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+      "payTo": "0xYourPaymentAddressHere",
+      "maxTimeoutSeconds": 300,
+      "extra": {
+        "name": "USDC",
+        "version": "2"
+      }
+    }
+  ]
+}
+```
+
+```json
+{
+  "x402Version": 2,
+  "error": "Payment required",
+  "resource": {
+    "url": "https://<固有値>.cloudfront.net/content/article",
+    "description": "Premium content ($0.005 USDC)",
+    "mimeType": ""
+  },
+  "accepts": [
+    {
+      "scheme": "exact",
+      "network": "eip155:84532",
+      "amount": "5000",
+      "asset": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+      "payTo": "0xYourPaymentAddressHere",
+      "maxTimeoutSeconds": 300,
+      "extra": {
+        "name": "USDC",
+        "version": "2"
+      }
+    }
+  ]
+}
+```
+
 ---
 
 ### ローカル開発・テスト

@@ -1,0 +1,22 @@
+{
+  "name": "x402-scripts",
+  "version": "1.0.0",
+  "private": true,
+  "description": "x402 payment test scripts for CloudFront + Lambda@Edge",
+  "type": "module",
+  "scripts": {
+    "generate": "bun run generate-payment.ts",
+    "generate:premium": "bun run generate-payment.ts /api/premium/data",
+    "generate:content": "bun run generate-payment.ts /content/article",
+    "pay": "bun run generate-payment.ts --pay",
+    "pay:premium": "bun run generate-payment.ts /api/premium/data --pay",
+    "pay:content": "bun run generate-payment.ts /content/article --pay"
+  },
+  "dependencies": {
+    "@x402/core": "2.2.0",
+    "@x402/evm": "2.2.0",
+    "@x402/fetch": "2.2.0",
+    "dotenv": "^17.3.1",
+    "viem": "^2.0.0"
+  }
+}

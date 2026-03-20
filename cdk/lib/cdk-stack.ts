@@ -6,7 +6,10 @@ import * as nodejs from "aws-cdk-lib/aws-lambda-nodejs";
 import * as cdk from "aws-cdk-lib/core";
 import { spawnSync } from "child_process";
 import { Construct } from "constructs";
+import * as dotenv from "dotenv";
 import * as path from "path";
+
+dotenv.config();
 
 /**
  * CDKスタックファイル
