@@ -265,7 +265,21 @@ export class PaymentProxyStack extends cdk.Stack {
 
 ## Phase 4: `AgentCoreGatewayStack` (新規)
 
+> **調査結果による修正点 (2026-03-21):**
+> - AgentCore Gateway は **2025年10月 GA** 済み。`CfnResource` は不要
+> - **L2 alpha パッケージ** `@aws-cdk/aws-bedrock-agentcore-alpha` を使用する
+> - `GatewayTarget` は Gateway のプロパティではなく **独立リソース**（L2 では `gateway.addOpenApiTarget()` メソッドで追加）
+> - MCP プロトコルバージョンは `MCP_2025_03_26` または `MCP_2025_06_18` を指定
+> - 対応リージョン: us-east-1, us-east-2, us-west-2, ap-northeast-1 他 9 リージョン
+
 AgentCore Gateway を MCP サーバーとして設定。
+
+### 追加パッケージ
+
+```bash
+cd cdk
+bun add @aws-cdk/aws-bedrock-agentcore-alpha
+```
 
 ### OpenAPI Spec
 
@@ -321,6 +335,7 @@ paths:
 import * as cdk from "aws-cdk-lib";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as s3assets from "aws-cdk-lib/aws-s3-assets";
+import * as agentcore from "@aws-cdk/aws-bedrock-agentcore-alpha";
 import * as path from "path";
 import { Construct } from "constructs";
 
@@ -336,49 +351,58 @@ export class AgentCoreGatewayStack extends cdk.Stack {
     super(scope, id, props);
 
     // Gateway 実行ロール
-    const gatewayRole = new iam.Role(this, 'GatewayRole', {
-      assumedBy: new iam.ServicePrincipal('bedrock-agentcore.amazonaws.com'),
-      description: 'AgentCore Gateway execution role for x402 payment proxy',
+    const gatewayRole = new iam.Role(this, "GatewayRole", {
+      assumedBy: new iam.ServicePrincipal("bedrock-agentcore.amazonaws.com"),
+      description: "AgentCore Gateway execution role for x402 payment proxy",
     });
 
+    // Payment Proxy API GW を呼び出す権限
+    gatewayRole.addToPolicy(new iam.PolicyStatement({
+      actions: ["execute-api:Invoke"],
+      resources: [`${props.paymentProxyApiUrl}*`],
+    }));
+
     // OpenAPI spec を S3 Asset として管理
-    const openApiSpec = new s3assets.Asset(this, 'OpenApiSpec', {
-      path: path.join(__dirname, '../openapi/payment-proxy-api.yaml'),
+    const openApiSpec = new s3assets.Asset(this, "OpenApiSpec", {
+      path: path.join(__dirname, "../openapi/payment-proxy-api.yaml"),
     });
     openApiSpec.grantRead(gatewayRole);
 
-    // AgentCore Gateway (L1 construct)
-    // NOTE: AWS::BedrockAgentCore::Gateway のリソース名は GA 時に変わる可能性あり
-    const gateway = new cdk.CfnResource(this, 'X402Gateway', {
-      type: 'AWS::BedrockAgentCore::Gateway',
-      properties: {
-        GatewayName: 'x402-payment-gateway',
-        Description: 'MCP server wrapping x402-protected CloudFront content',
-        RoleArn: gatewayRole.roleArn,
-        ProtocolConfiguration: {
-          McpConfiguration: {
-            Enabled: true,
-          },
+    // AgentCore Gateway (L2 alpha construct)
+    // ProtocolType: MCP — クライアントは MCP プロトコルで接続する
+    const gateway = new agentcore.Gateway(this, "X402Gateway", {
+      gatewayName: "x402-payment-gateway",
+      description: "MCP server wrapping x402-protected CloudFront content",
+      roleArn: gatewayRole.roleArn,
+      protocolType: agentcore.ProtocolType.MCP,
+      protocolConfiguration: {
+        mcpConfiguration: {
+          // MCP spec バージョン (2025年3月版)
+          supportedVersions: ["MCP_2025_03_26"],
         },
-        GatewayTargets: [{
-          HttpGatewayTarget: {
-            Uri: props.paymentProxyApiUrl,
-          },
-          OpenApiSpec: {
-            S3: {
-              Bucket: openApiSpec.s3BucketName,
-              Key: openApiSpec.s3ObjectKey,
-            },
-          },
-        }],
       },
     });
 
-    this.gatewayArn = gateway.getAtt('GatewayArn').toString();
-    this.mcpEndpointUrl = gateway.getAtt('GatewayEndpointUrl').toString();
+    // GatewayTarget: OpenAPI spec を使って Payment Proxy API を MCP ツールとして公開
+    // L2 では gateway.addOpenApiTarget() メソッドで追加する
+    gateway.addOpenApiTarget("PaymentProxyTarget", {
+      targetName: "x402-payment-proxy",
+      description: "x402 auto-payment proxy for CloudFront-protected content",
+      endpoint: props.paymentProxyApiUrl,
+      apiSchemaConfiguration: {
+        s3: {
+          bucket: openApiSpec.s3BucketName,
+          key: openApiSpec.s3ObjectKey,
+        },
+      },
+    });
 
-    new cdk.CfnOutput(this, 'GatewayArn', { value: this.gatewayArn });
-    new cdk.CfnOutput(this, 'McpEndpointUrl', { value: this.mcpEndpointUrl });
+    this.gatewayArn = gateway.gatewayArn;
+    // MCP エンドポイント URL (例: https://<id>.gateway.bedrock-agentcore.us-east-1.amazonaws.com/mcp)
+    this.mcpEndpointUrl = gateway.gatewayEndpointUrl;
+
+    new cdk.CfnOutput(this, "GatewayArn", { value: this.gatewayArn });
+    new cdk.CfnOutput(this, "McpEndpointUrl", { value: this.mcpEndpointUrl });
   }
 }
 ```
@@ -389,6 +413,13 @@ export class AgentCoreGatewayStack extends cdk.Stack {
 
 ### Strands Agent (Python Lambda)
 
+> **調査結果による修正点 (2026-03-21):**
+> - 最新版: **strands-agents v1.32.0** (2026-03-20)
+> - `MCPClient(server_url=...)` は **存在しない** → トランスポートファクトリ関数（lambda）を渡す
+> - AgentCore Gateway への接続は **AWS IAM 認証** が必要 → `mcp-proxy-for-aws` パッケージを使用
+> - **マネージドパターン**: `Agent(tools=[mcp_client])` でライフサイクルを自動管理（`with` ブロック不要）
+> - Python >= 3.10 必須、`mcp >= 1.23.0` 必須
+
 **ファイル:** `cdk/functions/strands-agent/agent.py`
 
 ```python
@@ -397,6 +428,8 @@ import json
 from strands import Agent
 from strands.models import BedrockModel
 from strands.tools.mcp import MCPClient
+# AgentCore Gateway は AWS IAM 認証が必要 → mcp-proxy-for-aws を使用
+from mcp_proxy_for_aws.client import aws_iam_streamablehttp_client
 
 GATEWAY_MCP_URL = os.environ["AGENT_CORE_GATEWAY_MCP_URL"]
 AWS_REGION = os.environ.get("AWS_REGION", "us-east-1")
@@ -406,12 +439,20 @@ model = BedrockModel(
     region_name=AWS_REGION,
 )
 
-# AgentCore Gateway に MCP クライアントとして接続
-mcp_client = MCPClient(server_url=GATEWAY_MCP_URL)
+# AgentCore Gateway に MCP クライアントとして接続（AWS IAM 署名付き）
+# MCPClient はトランスポートファクトリ関数（lambda）を受け取る
+mcp_client = MCPClient(
+    lambda: aws_iam_streamablehttp_client(
+        endpoint=GATEWAY_MCP_URL,
+        aws_region=AWS_REGION,
+        aws_service="bedrock-agentcore",
+    )
+)
 
+# マネージドパターン: Agent に MCPClient を直接渡すとライフサイクルを自動管理
 agent = Agent(
     model=model,
-    tools=[*mcp_client.get_tools()],
+    tools=[mcp_client],
     system_prompt="""You are an AI assistant that can access x402-protected premium content.
 You have access to the following tools via MCP:
 - getHelloContent: Fetch hello content (auto-pays $0.001 USDC)
@@ -448,7 +489,9 @@ def handler(event, context):
 **ファイル:** `cdk/functions/strands-agent/requirements.txt`
 
 ```
-strands-agents>=0.1.0
+strands-agents>=1.32.0
+mcp>=1.23.0
+mcp-proxy-for-aws
 boto3>=1.35.0
 ```
 
@@ -885,7 +928,7 @@ new FrontendStack(app, "FrontendStack", {
 ```bash
 # ① CDK 追加パッケージのインストール
 cd cdk
-bun add @aws-cdk/aws-lambda-python-alpha
+bun add @aws-cdk/aws-lambda-python-alpha @aws-cdk/aws-bedrock-agentcore-alpha
 
 # ② フロントエンド依存パッケージのインストール
 cd ../frontend
@@ -930,10 +973,11 @@ curl -X POST <StrandsAgentApiUrl>/invoke \
 
 | 項目 | 詳細 |
 |------|------|
-| **AgentCore Gateway CDK L1** | `AWS::BedrockAgentCore::Gateway` の CloudFormation リソース名は本番 GA で変わる可能性あり。デプロイ前に `aws cloudformation describe-type` で確認 |
-| **AgentCore 対応リージョン** | AgentCore は全リージョンで使えない。`us-east-1` / `us-west-2` を確認してから設定 |
+| **AgentCore Gateway CDK L2** | `@aws-cdk/aws-bedrock-agentcore-alpha` を使用。Alpha パッケージのため API は変わる可能性あり。GA 時に stable モジュールへ移行予定 |
+| **AgentCore 対応リージョン** | 2025年10月 GA。対応 9 リージョン: us-east-1, us-east-2, us-west-2, ap-northeast-1, ap-south-1, ap-southeast-1/2, eu-central-1, eu-west-1 |
 | **Python Lambda bundling** | `@aws-cdk/aws-lambda-python-alpha` は Docker 必要。CI 環境要確認 |
-| **Strands SDK MCP 接続** | `MCPClient` の API は SDK バージョンで変わる可能性あり。`strands-agents` のドキュメントを都度確認 |
+| **Strands SDK MCP 接続** | `MCPClient(server_url=...)` は存在しない。必ずトランスポートファクトリ lambda を渡すこと。最新版: v1.32.0 |
+| **AgentCore Gateway IAM 認証** | `mcp-proxy-for-aws` パッケージが必要。Lambda 実行ロールに `bedrock-agentcore:InvokeGateway` 権限を付与すること |
 | **Payment Proxy コールドスタート** | Secrets Manager 取得により初回は遅い (~1s)。Provisioned Concurrency の検討を推奨 |
 | **Lambda@Edge リージョン** | 既存の Lambda@Edge は `us-east-1` 固定。全スタックを同リージョンに寄せる方針で統一済み |
 | **CORS (StrandsAgentApi)** | フロントエンドの CloudFront URL からリクエストが来るため、StrandsAgentStack の API GW に CORS 設定が必要 |
@@ -948,8 +992,8 @@ curl -X POST <StrandsAgentApiUrl>/invoke \
 Phase 1 (SecretsStack)         ✅ 簡単・他スタックのブロッカー
 Phase 2 (CdkStack 修正)        ✅ 軽微な変更のみ
 Phase 3 (PaymentProxyStack)    ✅ TypeScript + @x402/fetch で実装容易。単体テスト可能
-Phase 4 (AgentCoreGateway)     ⚠️  L1 CfnResource を使用。GA ドキュメント要確認
-Phase 5 (StrandsAgentStack)    ⚠️  Python + strands SDK。MCPClient API 要確認
+Phase 4 (AgentCoreGateway)     ✅ L2 alpha パッケージ確認済み。GA リージョン確認済み
+Phase 5 (StrandsAgentStack)    ✅ v1.32.0 API 確認済み。mcp-proxy-for-aws で IAM 認証
 Phase 6 (bin/cdk.ts)           ✅ 配線のみ
 Phase 7 (FrontendStack)        ✅ CDK 標準構成。ビルド済み dist が必要
 Phase 8 (bin/cdk.ts 最終)      ✅ FrontendStack の追加のみ
