@@ -1,30 +1,31 @@
-/**
- * Origin Response Lambda@Edge Handler
- *
- * Settles x402 payment only if origin returned success (status < 400).
- * This ensures customers are not charged for failed API requests.
- */
-
 import type {
 	CloudFrontResponseEvent,
 	CloudFrontResponseResult,
 } from "aws-lambda";
+import { FACILITATOR_URL, NETWORK, ROUTES } from "./config";
 import {
 	createX402Middleware,
 	MiddlewareResultType,
 	type LambdaEdgeResponse,
 } from "./lib";
-import { FACILITATOR_URL, NETWORK, ROUTES } from "./config";
 
+// x402のミドルウェアを作成
 const x402 = createX402Middleware({
 	facilitatorUrl: FACILITATOR_URL,
 	network: NETWORK,
 	routes: ROUTES,
 });
 
+/**
+ * Origin Response Lambda@Edge Handler
+ *
+ * Settles x402 payment only if origin returned success (status < 400).
+ * This ensures customers are not charged for failed API requests.
+ */
 export const handler = async (
 	event: CloudFrontResponseEvent,
 ): Promise<CloudFrontResponseResult | LambdaEdgeResponse> => {
+	// CloudFrontのレスポンスイベントからリクエストとレスポンスを取得
 	const request = event.Records[0].cf.request;
 	const response = event.Records[0].cf.response;
 

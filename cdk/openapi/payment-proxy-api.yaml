@@ -4,6 +4,7 @@ info:
   version: "1.0.0"
   description: "MCP tools for accessing x402-protected content via auto-payment proxy"
 paths:
+  # Say Hello エンドポイント
   /proxy/hello:
     get:
       operationId: "getHelloContent"
@@ -16,6 +17,7 @@ paths:
             application/json:
               schema:
                 type: object
+  # Premium Analytics エンドポイント
   /proxy/premium:
     get:
       operationId: "getPremiumData"
@@ -28,6 +30,7 @@ paths:
             application/json:
               schema:
                 type: object
+  # 記事を取得するエンドポイント
   /proxy/article:
     get:
       operationId: "getArticleContent"

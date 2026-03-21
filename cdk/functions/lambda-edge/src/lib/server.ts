@@ -1,8 +1,8 @@
-import type { RoutesConfig, FacilitatorConfig } from "@x402/core/server";
+import type { FacilitatorConfig, RoutesConfig } from "@x402/core/server";
 import {
-	x402ResourceServer,
-	x402HTTPResourceServer,
 	HTTPFacilitatorClient,
+	x402HTTPResourceServer,
+	x402ResourceServer,
 } from "@x402/core/server";
 import { ExactEvmScheme } from "@x402/evm/exact/server";
 
@@ -44,14 +44,16 @@ export interface X402ServerConfig {
 export async function createX402Server(
 	config: X402ServerConfig,
 ): Promise<x402HTTPResourceServer> {
+	// ファシリテータークライアントを作成（認証が必要な場合はfacilitatorConfigを使用）
 	const facilitator = new HTTPFacilitatorClient(
 		config.facilitatorConfig ?? { url: config.facilitatorUrl },
 	);
+	// リソースサーバーインスタンスを作成し、指定されたネットワークとスキームでルートを登録
 	const resourceServer = new x402ResourceServer(facilitator).register(
 		config.network as `${string}:${string}`,
 		new ExactEvmScheme(),
 	);
-
+	// HTTPサーバーを作成し、初期化して準備完了
 	const httpServer = new x402HTTPResourceServer(resourceServer, config.routes);
 	await httpServer.initialize();
 

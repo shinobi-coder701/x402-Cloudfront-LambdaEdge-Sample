@@ -32,7 +32,7 @@
 
 ### Layer 1 — x402 エッジゲートウェイ（既存）
 
-CloudFront + Lambda@Edge がリクエストをエッジで検証・決済します。
+CloudFront + Lambda@Edge がリクエストをエッジで検証・決済します。  
 オリジンサーバーへのアクセスは支払い済みリクエストのみ許可されます。
 
 ```
@@ -179,7 +179,7 @@ sequenceDiagram
     participant SA as Strands Agent<br/>(StrandsAgentStack)
     participant GW as AgentCore Gateway<br/>(MCP Server)
     participant PP as Payment Proxy<br/>(PaymentProxyStack)
-    participant CF as CloudFront + Lambda@Edge<br/>(CdkStack)
+    participant CF as CloudFront + <br/> Lambda@Edge<br/>(CdkStack)
     participant SM as SecretsManager<br/>(SecretsStack)
 
     UI->>SA: POST /invoke<br/>{"message": "プレミアムデータを取得して"}
@@ -196,8 +196,8 @@ sequenceDiagram
     PP-->>GW: 200 OK + コンテンツ
     GW-->>SA: MCP tool result
     SA->>SA: Bedrock で応答を生成
-    SA-->>UI: {"response": "プレミムデータ: ...", "tool_used": "getPremiumData", "payment_usdc": "0.01"}
-    UI->>UI: 支払い台帳に $0.01 USDC を追記
+    SA-->>UI: {"response": "プレミムデータ: ...", <br/>"tool_used": "getPremiumData",<br/> "payment_usdc": "0.01"}
+    UI->>UI: 支払い台帳に <br/>$0.01 USDC を追記
 ```
 
 ### 4. オリジンエラー時（課金なし）

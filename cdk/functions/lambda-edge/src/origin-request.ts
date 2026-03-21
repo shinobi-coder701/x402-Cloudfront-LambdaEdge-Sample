@@ -1,27 +1,27 @@
-/**
- * Origin Request Lambda@Edge Handler
- *
- * Verifies x402 payment and forwards valid requests to origin.
- * Settlement is deferred to origin-response handler.
- */
-
 import type {
 	CloudFrontRequestEvent,
 	CloudFrontRequestResult,
 } from "aws-lambda";
+import { FACILITATOR_URL, NETWORK, ROUTES } from "./config";
 import {
 	createX402Middleware,
 	MiddlewareResultType,
 	type LambdaEdgeResponse,
 } from "./lib";
-import { FACILITATOR_URL, NETWORK, ROUTES } from "./config";
 
+// x402のミドルウェアを作成
 const x402 = createX402Middleware({
 	facilitatorUrl: FACILITATOR_URL,
 	network: NETWORK,
 	routes: ROUTES,
 });
 
+/**
+ * Origin Request Lambda@Edge Handler
+ *
+ * Verifies x402 payment and forwards valid requests to origin.
+ * Settlement is deferred to origin-response handler.
+ */
 export const handler = async (
 	event: CloudFrontRequestEvent,
 ): Promise<CloudFrontRequestResult | LambdaEdgeResponse> => {
