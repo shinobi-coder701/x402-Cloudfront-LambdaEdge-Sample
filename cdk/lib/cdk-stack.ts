@@ -28,6 +28,9 @@ dotenv.config();
  * このスタックはすべてのリソースをus-east-1に配置することで、デモをシンプルに保っています。
  */
 export class CdkStack extends cdk.Stack {
+	/** CloudFront distribution URL — used by PaymentProxyStack as the payment target */
+	public readonly cloudFrontUrl: string;
+
 	/**
 	 * コンストラクター
 	 * @param scope
@@ -270,6 +273,8 @@ export class CdkStack extends cdk.Stack {
 				},
 			},
 		});
+
+		this.cloudFrontUrl = `https://${distribution.distributionDomainName}`;
 
     // ================================================================================
 		// ── Outputs ───────────────────────────────────────────────────────────────

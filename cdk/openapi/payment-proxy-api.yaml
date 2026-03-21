@@ -1,0 +1,42 @@
+openapi: "3.0.1"
+info:
+  title: "x402 Payment Proxy API"
+  version: "1.0.0"
+  description: "MCP tools for accessing x402-protected content via auto-payment proxy"
+paths:
+  /proxy/hello:
+    get:
+      operationId: "getHelloContent"
+      summary: "Get hello content"
+      description: "Get hello content (costs $0.001 USDC on Base Sepolia). Payment is handled automatically."
+      responses:
+        "200":
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                type: object
+  /proxy/premium:
+    get:
+      operationId: "getPremiumData"
+      summary: "Get premium analytics data"
+      description: "Get premium analytics data (costs $0.01 USDC on Base Sepolia). Payment is handled automatically."
+      responses:
+        "200":
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                type: object
+  /proxy/article:
+    get:
+      operationId: "getArticleContent"
+      summary: "Get article content"
+      description: "Get article content (costs $0.005 USDC on Base Sepolia). Payment is handled automatically."
+      responses:
+        "200":
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                type: object
