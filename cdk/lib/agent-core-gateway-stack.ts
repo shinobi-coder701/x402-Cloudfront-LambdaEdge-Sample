@@ -1,7 +1,6 @@
+import * as agentcore from "@aws-cdk/aws-bedrock-agentcore-alpha";
 import * as cdk from "aws-cdk-lib";
 import * as apigw from "aws-cdk-lib/aws-apigateway";
-import * as agentcore from "@aws-cdk/aws-bedrock-agentcore-alpha";
-import * as path from "path";
 import { Construct } from "constructs";
 
 export interface AgentCoreGatewayStackProps extends cdk.StackProps {
@@ -93,6 +92,10 @@ export class AgentCoreGatewayStack extends cdk.Stack {
 		// MCP エンドポイント URL
 		// 例: https://<id>.gateway.bedrock-agentcore.<region>.amazonaws.com/mcp
 		this.mcpEndpointUrl = gateway.gatewayUrl ?? `https://unknown.gateway.bedrock-agentcore.${this.region}.amazonaws.com/mcp`;
+
+		// ===========================================================================
+		// 成果物
+		// ===========================================================================
 
 		new cdk.CfnOutput(this, "GatewayArn", {
 			value: this.gatewayArn,

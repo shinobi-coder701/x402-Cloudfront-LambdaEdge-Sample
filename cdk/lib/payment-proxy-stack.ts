@@ -1,10 +1,10 @@
 import * as cdk from "aws-cdk-lib";
+import * as apigw from "aws-cdk-lib/aws-apigateway";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as nodejs from "aws-cdk-lib/aws-lambda-nodejs";
-import * as apigw from "aws-cdk-lib/aws-apigateway";
 import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
-import * as path from "path";
 import { Construct } from "constructs";
+import * as path from "path";
 
 export interface PaymentProxyStackProps extends cdk.StackProps {
 	/** CloudFront distribution URL from CdkStack */
@@ -30,9 +30,16 @@ export class PaymentProxyStack extends cdk.Stack {
 	/** API Gateway REST API — AgentCore Gateway の addApiGatewayTarget に渡す */
 	public readonly api: apigw.LambdaRestApi;
 
+	/**
+	 * コンストラクター
+	 * @param scope 
+	 * @param id 
+	 * @param props 
+	 */
 	constructor(scope: Construct, id: string, props: PaymentProxyStackProps) {
 		super(scope, id, props);
 
+		// Proxy用のLambda関数
 		const fn = new nodejs.NodejsFunction(this, "PaymentProxy", {
 			entry: path.join(__dirname, "../functions/payment-proxy/index.ts"),
 			runtime: lambda.Runtime.NODEJS_22_X,
@@ -53,6 +60,7 @@ export class PaymentProxyStack extends cdk.Stack {
 		// SecretsManager から EVM private key を読む権限
 		props.evmPrivateKeySecret.grantRead(fn);
 
+		// API GatewayとLambda関数を紐付け
 		this.api = new apigw.LambdaRestApi(this, "PaymentProxyApi", {
 			handler: fn,
 			proxy: true,
@@ -63,6 +71,10 @@ export class PaymentProxyStack extends cdk.Stack {
 		});
 
 		this.apiUrl = this.api.url;
+
+		// ===========================================================================
+		// 成果物
+		// ===========================================================================
 
 		new cdk.CfnOutput(this, "PaymentProxyApiUrl", {
 			value: this.apiUrl,

@@ -13,6 +13,12 @@ import { Construct } from "constructs";
 export class SecretsStack extends cdk.Stack {
 	public readonly evmPrivateKeySecret: secretsmanager.ISecret;
 
+	/**
+	 * コンストラクター
+	 * @param scope 
+	 * @param id 
+	 * @param props 
+	 */
 	constructor(scope: Construct, id: string, props?: cdk.StackProps) {
 		super(scope, id, props);
 
@@ -25,6 +31,10 @@ export class SecretsStack extends cdk.Stack {
 					"EVM private key for x402 payment signing (Base Sepolia testnet)",
 			},
 		);
+
+		// ===========================================================================
+		// 成果物
+		// ===========================================================================
 
 		new cdk.CfnOutput(this, "SecretArn", {
 			value: this.evmPrivateKeySecret.secretArn,

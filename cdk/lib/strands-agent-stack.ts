@@ -1,10 +1,10 @@
-import * as cdk from "aws-cdk-lib";
-import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as python from "@aws-cdk/aws-lambda-python-alpha";
+import * as cdk from "aws-cdk-lib";
 import * as apigw from "aws-cdk-lib/aws-apigateway";
 import * as iam from "aws-cdk-lib/aws-iam";
-import * as path from "path";
+import * as lambda from "aws-cdk-lib/aws-lambda";
 import { Construct } from "constructs";
+import * as path from "path";
 
 export interface StrandsAgentStackProps extends cdk.StackProps {
 	/** MCP endpoint URL from AgentCoreGatewayStack */
@@ -24,9 +24,16 @@ export class StrandsAgentStack extends cdk.Stack {
 	/** API Gateway URL — FrontendStack に渡す */
 	public readonly apiUrl: string;
 
+	/**
+	 * コンストラクター
+	 * @param scope 
+	 * @param id 
+	 * @param props 
+	 */
 	constructor(scope: Construct, id: string, props: StrandsAgentStackProps) {
 		super(scope, id, props);
 
+		// Strands Agent 用の Lambda 関数の設定
 		const fn = new python.PythonFunction(this, "StrandsAgent", {
 			entry: path.join(__dirname, "../functions/strands-agent"),
 			index: "agent.py",
@@ -64,6 +71,7 @@ export class StrandsAgentStack extends cdk.Stack {
 			}),
 		);
 
+		// APIGatewayとLambda関数の紐付け
 		const api = new apigw.LambdaRestApi(this, "StrandsAgentApi", {
 			handler: fn,
 			proxy: true,
@@ -79,6 +87,10 @@ export class StrandsAgentStack extends cdk.Stack {
 		});
 
 		this.apiUrl = api.url;
+
+		// ===========================================================================
+		// 成果物
+		// ===========================================================================
 
 		new cdk.CfnOutput(this, "StrandsAgentApiUrl", {
 			value: this.apiUrl,
