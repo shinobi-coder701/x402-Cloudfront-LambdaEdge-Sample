@@ -414,12 +414,19 @@ curl -i https://xxxxxxxxxx.cloudfront.net/api/hello
 npx cdk deploy SecretsStack
 ```
 
+以下のようになればOK!
+
+```bash
+
+```
+
 #### 2. EVM private key をシークレットに設定
 
 Payment Proxy Lambda が x402 支払いに使用する秘密鍵を設定します。
 **このウォレットに Base Sepolia USDC を入金しておいてください。**
 
 ```bash
+# 0xYOUR_EVM_PRIVATE_KEY の部分はあなたの秘密鍵に置き換えてください。
 aws secretsmanager put-secret-value \
   --secret-id x402/evm-private-key \
   --secret-string "0xYOUR_EVM_PRIVATE_KEY"
@@ -431,10 +438,22 @@ aws secretsmanager put-secret-value \
 npx cdk deploy PaymentProxyStack
 ```
 
+以下のようになればOK!
+
+```bash
+
+```
+
 #### 4. AgentCoreGatewayStack のデプロイ
 
 ```bash
 npx cdk deploy AgentCoreGatewayStack
+```
+
+以下のようになればOK!
+
+```bash
+
 ```
 
 > **対応リージョン:** us-east-1 / us-east-2 / us-west-2 / ap-northeast-1 他
@@ -443,6 +462,12 @@ npx cdk deploy AgentCoreGatewayStack
 
 ```bash
 npx cdk deploy StrandsAgentStack
+```
+
+以下のようになればOK!
+
+```bash
+
 ```
 
 > **Bedrock モデルアクセスの有効化**
@@ -489,7 +514,7 @@ FrontendStack.FrontendUrl = https://yyyyyyyyyy.cloudfront.net
 cd cdk
 
 # 全スタックをまとめてデプロイ（SecretsStack は先にデプロイし、秘密鍵設定後に残りを実行）
-npx cdk deploy SecretsStack
+bunx cdk deploy SecretsStack
 
 aws secretsmanager put-secret-value \
   --secret-id x402/evm-private-key \

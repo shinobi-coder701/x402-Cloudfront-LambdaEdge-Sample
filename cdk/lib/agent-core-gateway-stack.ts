@@ -23,6 +23,12 @@ export class AgentCoreGatewayStack extends cdk.Stack {
 	/** MCP エンドポイント URL (Strands Agent が接続する) */
 	public readonly mcpEndpointUrl: string;
 
+	/**
+	 * コンストラクター
+	 * @param scope 
+	 * @param id 
+	 * @param props 
+	 */
 	constructor(
 		scope: Construct,
 		id: string,
@@ -44,12 +50,17 @@ export class AgentCoreGatewayStack extends cdk.Stack {
 		});
 
 		// Payment Proxy API をツールとして公開
-		// addApiGatewayTarget は IAM 権限を自動付与する
+		// credentialProviderConfigurations は API Gateway ターゲットでは必須 (L1 required フィールド)
+		// fromIamRole() を明示指定することで CfnGatewayTarget の synthesis エラーを回避する
 		gateway.addApiGatewayTarget("PaymentProxyTarget", {
 			gatewayTargetName: "x402-payment-proxy",
 			description:
 				"x402 auto-payment proxy for CloudFront-protected content",
 			restApi: props.paymentProxyApi,
+			credentialProviderConfigurations: [
+				agentcore.GatewayCredentialProvider.fromIamRole(),
+			],
+			// APIを呼び出し可能なツールとして設定する
 			apiGatewayToolConfiguration: {
 				toolFilters: [
 					{
