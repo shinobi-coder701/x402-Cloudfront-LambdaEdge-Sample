@@ -60,7 +60,7 @@ export class AgentCoreGatewayStack extends cdk.Stack {
 			credentialProviderConfigurations: [
 				agentcore.GatewayCredentialProvider.fromIamRole(),
 			],
-			// APIを呼び出し可能なツールとして設定する
+			// APIを呼び出し可能なツールとして設定する(API　Gatewayとの紐付け)
 			apiGatewayToolConfiguration: {
 				toolFilters: [
 					{
@@ -76,6 +76,7 @@ export class AgentCoreGatewayStack extends cdk.Stack {
 						methods: [agentcore.ApiGatewayHttpMethod.GET],
 					},
 				],
+				// ツールの設定を上書き
 				toolOverrides: [
 					{
 						path: "/proxy/hello",
