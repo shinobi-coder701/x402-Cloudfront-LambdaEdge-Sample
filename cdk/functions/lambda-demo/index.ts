@@ -1,7 +1,4 @@
-import type {
-	APIGatewayProxyEvent,
-	APIGatewayProxyResult,
-} from "aws-lambda";
+import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 
 /**
  * Demo origin Lambda — simulates a content API protected by x402.

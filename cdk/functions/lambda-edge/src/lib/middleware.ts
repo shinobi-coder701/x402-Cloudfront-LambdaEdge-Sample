@@ -99,7 +99,7 @@ export function createX402Middleware(config: X402ServerConfig) {
 	 *
 	 * 初回呼び出し時にサーバーを作成し、以降は同じインスタンスを返す。
 	 * Lambdaのコールドスタートを考慮した最適化。
-	 * @returns 
+	 * @returns
 	 */
 	const getServer = async (): Promise<x402HTTPResourceServer> => {
 		if (!serverPromise) {

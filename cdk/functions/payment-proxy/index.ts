@@ -53,8 +53,8 @@ async function getPayFetch(): Promise<typeof fetch> {
 /**
  * Proxyハンドラーメソッド。
  * API Gateway からのリクエストを受け取り、対応する CloudFront のエンドポイントに転送する。
- * @param event 
- * @returns 
+ * @param event
+ * @returns
  */
 export const handler = async (
 	event: APIGatewayProxyEvent,

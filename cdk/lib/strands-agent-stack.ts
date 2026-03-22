@@ -27,9 +27,9 @@ export class StrandsAgentStack extends cdk.Stack {
 
 	/**
 	 * コンストラクター
-	 * @param scope 
-	 * @param id 
-	 * @param props 
+	 * @param scope
+	 * @param id
+	 * @param props
 	 */
 	constructor(scope: Construct, id: string, props: StrandsAgentStackProps) {
 		super(scope, id, props);
@@ -60,10 +60,13 @@ export class StrandsAgentStack extends cdk.Stack {
 						const install = spawnSync(
 							pythonBin,
 							[
-								"-m", "pip",
+								"-m",
+								"pip",
 								"install",
-								"-r", "requirements.txt",
-								"-t", outputDir,
+								"-r",
+								"requirements.txt",
+								"-t",
+								outputDir,
 								"--quiet",
 							],
 							{ cwd: entryDir, stdio: "inherit" },
@@ -132,7 +135,8 @@ export class StrandsAgentStack extends cdk.Stack {
 		const api = new apigw.LambdaRestApi(this, "StrandsAgentApi", {
 			handler: fn,
 			proxy: true,
-			description: "Strands Agent API — natural language interface for x402 content",
+			description:
+				"Strands Agent API — natural language interface for x402 content",
 			defaultCorsPreflightOptions: {
 				allowOrigins: apigw.Cors.ALL_ORIGINS,
 				allowMethods: apigw.Cors.ALL_METHODS,

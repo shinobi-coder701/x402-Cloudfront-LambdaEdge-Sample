@@ -32,9 +32,9 @@ export class PaymentProxyStack extends cdk.Stack {
 
 	/**
 	 * コンストラクター
-	 * @param scope 
-	 * @param id 
-	 * @param props 
+	 * @param scope
+	 * @param id
+	 * @param props
 	 */
 	constructor(scope: Construct, id: string, props: PaymentProxyStackProps) {
 		super(scope, id, props);
@@ -54,7 +54,8 @@ export class PaymentProxyStack extends cdk.Stack {
 				nodeModules: ["@x402/core", "@x402/evm", "@x402/fetch", "viem"],
 				externalModules: ["@aws-sdk/*"],
 			},
-			description: "x402 payment proxy — auto-pays 402 responses before returning content",
+			description:
+				"x402 payment proxy — auto-pays 402 responses before returning content",
 		});
 
 		// SecretsManager から EVM private key を読む権限

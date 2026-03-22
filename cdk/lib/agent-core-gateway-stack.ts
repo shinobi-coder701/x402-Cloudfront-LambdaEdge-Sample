@@ -25,15 +25,11 @@ export class AgentCoreGatewayStack extends cdk.Stack {
 
 	/**
 	 * コンストラクター
-	 * @param scope 
-	 * @param id 
-	 * @param props 
+	 * @param scope
+	 * @param id
+	 * @param props
 	 */
-	constructor(
-		scope: Construct,
-		id: string,
-		props: AgentCoreGatewayStackProps,
-	) {
+	constructor(scope: Construct, id: string, props: AgentCoreGatewayStackProps) {
 		super(scope, id, props);
 
 		// AgentCore Gateway (L2 alpha construct)
@@ -54,8 +50,7 @@ export class AgentCoreGatewayStack extends cdk.Stack {
 		// fromIamRole() を明示指定することで CfnGatewayTarget の synthesis エラーを回避する
 		gateway.addApiGatewayTarget("PaymentProxyTarget", {
 			gatewayTargetName: "x402-payment-proxy",
-			description:
-				"x402 auto-payment proxy for CloudFront-protected content",
+			description: "x402 auto-payment proxy for CloudFront-protected content",
 			restApi: props.paymentProxyApi,
 			credentialProviderConfigurations: [
 				agentcore.GatewayCredentialProvider.fromIamRole(),
@@ -82,19 +77,22 @@ export class AgentCoreGatewayStack extends cdk.Stack {
 						path: "/proxy/hello",
 						method: agentcore.ApiGatewayHttpMethod.GET,
 						name: "getHelloContent",
-						description: "Get hello content (auto-pays $0.001 USDC on Base Sepolia)",
+						description:
+							"Get hello content (auto-pays $0.001 USDC on Base Sepolia)",
 					},
 					{
 						path: "/proxy/premium",
 						method: agentcore.ApiGatewayHttpMethod.GET,
 						name: "getPremiumData",
-						description: "Get premium analytics data (auto-pays $0.01 USDC on Base Sepolia)",
+						description:
+							"Get premium analytics data (auto-pays $0.01 USDC on Base Sepolia)",
 					},
 					{
 						path: "/proxy/article",
 						method: agentcore.ApiGatewayHttpMethod.GET,
 						name: "getArticleContent",
-						description: "Get article content (auto-pays $0.005 USDC on Base Sepolia)",
+						description:
+							"Get article content (auto-pays $0.005 USDC on Base Sepolia)",
 					},
 				],
 			},
@@ -103,7 +101,9 @@ export class AgentCoreGatewayStack extends cdk.Stack {
 		this.gatewayArn = gateway.gatewayArn;
 		// MCP エンドポイント URL
 		// 例: https://<id>.gateway.bedrock-agentcore.<region>.amazonaws.com/mcp
-		this.mcpEndpointUrl = gateway.gatewayUrl ?? `https://unknown.gateway.bedrock-agentcore.${this.region}.amazonaws.com/mcp`;
+		this.mcpEndpointUrl =
+			gateway.gatewayUrl ??
+			`https://unknown.gateway.bedrock-agentcore.${this.region}.amazonaws.com/mcp`;
 
 		// ===========================================================================
 		// 成果物

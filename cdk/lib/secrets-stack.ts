@@ -15,9 +15,9 @@ export class SecretsStack extends cdk.Stack {
 
 	/**
 	 * コンストラクター
-	 * @param scope 
-	 * @param id 
-	 * @param props 
+	 * @param scope
+	 * @param id
+	 * @param props
 	 */
 	constructor(scope: Construct, id: string, props?: cdk.StackProps) {
 		super(scope, id, props);

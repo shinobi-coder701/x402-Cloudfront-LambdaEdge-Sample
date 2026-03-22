@@ -25,9 +25,9 @@ export class FrontendStack extends cdk.Stack {
 
 	/**
 	 * コンストラクター
-	 * @param scope 
-	 * @param id 
-	 * @param props 
+	 * @param scope
+	 * @param id
+	 * @param props
 	 */
 	constructor(scope: Construct, id: string, props: FrontendStackProps) {
 		super(scope, id, props);
@@ -80,9 +80,7 @@ export class FrontendStack extends cdk.Stack {
 		// ビルド済みフロントエンドを S3 に配置
 		new s3deploy.BucketDeployment(this, "DeployFrontend", {
 			sources: [
-				s3deploy.Source.asset(
-					path.join(__dirname, "../../frontend/dist"),
-				),
+				s3deploy.Source.asset(path.join(__dirname, "../../frontend/dist")),
 			],
 			destinationBucket: bucket,
 			distribution,
