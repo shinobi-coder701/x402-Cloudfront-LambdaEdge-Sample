@@ -566,6 +566,13 @@ cd cdk
 npx cdk destroy --all
 ```
 
+Lambda@Edgeだけは数時間後(レプリカが削除された後)に手動で削除する必要があるので注意です。
+
+```bash
+aws lambda delete-function --function-name CdkStack-OriginResponseFn0BEDF56E-RYprtghbLxd7 --region us-east-1
+aws lambda delete-function --function-name CdkStack-OriginRequestFn5947795F-p5ZOi0xo6Fi9 --region us-east-1
+```
+
 ---
 
 ## テストスクリプト（scripts/）
