@@ -51,8 +51,20 @@ agent = Agent(
     """,
 )
 
+# 共通 CORS ヘッダー
+CORS_HEADERS = {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Methods": "POST,OPTIONS",
+}
+
 # Lambda ハンドラー
 def handler(event, context):
+    # OPTIONS プリフライトへの応答 (proxy: true では Lambda 側で対応が必要)
+    if event.get("httpMethod") == "OPTIONS":
+        return {"statusCode": 200, "headers": CORS_HEADERS, "body": ""}
+
     body = json.loads(event.get("body", "{}"))
     # プロンプトを受け取る（例: {"message": "What is the latest premium content?"}）
     user_message = body.get("message", "")
@@ -61,7 +73,7 @@ def handler(event, context):
     if not user_message:
         return {
             "statusCode": 400,
-            "headers": {"Content-Type": "application/json"},
+            "headers": CORS_HEADERS,
             "body": json.dumps({"error": "message is required"}),
         }
 
@@ -71,10 +83,7 @@ def handler(event, context):
 
         return {
             "statusCode": 200,
-            "headers": {
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Origin": "*",
-            },
+            "headers": CORS_HEADERS,
             "body": json.dumps({
                 "session_id": session_id,
                 "response": str(response),
@@ -84,6 +93,6 @@ def handler(event, context):
         print(f"Agent error: {e}")
         return {
             "statusCode": 500,
-            "headers": {"Content-Type": "application/json"},
+            "headers": CORS_HEADERS,
             "body": json.dumps({"error": str(e)}),
         }

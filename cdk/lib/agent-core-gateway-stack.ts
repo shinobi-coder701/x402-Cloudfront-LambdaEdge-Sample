@@ -34,10 +34,12 @@ export class AgentCoreGatewayStack extends cdk.Stack {
 
 		// AgentCore Gateway (L2 alpha construct)
 		// ProtocolType: MCP — クライアントは MCP プロトコルで接続する
-		// ロールは自動生成される (target 追加時に権限が自動付与される)
+		// authorizerConfiguration: AWS_IAM — Lambda から SigV4 署名で接続する
+		// (デフォルトは Cognito JWT なので、IAM 認証を明示指定する必要がある)
 		const gateway = new agentcore.Gateway(this, "X402Gateway", {
 			gatewayName: "x402-payment-gateway",
 			description: "MCP server wrapping x402-protected CloudFront content",
+			authorizerConfiguration: agentcore.GatewayAuthorizer.usingAwsIam(),
 			protocolConfiguration: agentcore.GatewayProtocol.mcp({
 				supportedVersions: [agentcore.MCPProtocolVersion.MCP_2025_03_26],
 				instructions:

@@ -4,6 +4,7 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import { spawnSync } from "child_process";
 import { Construct } from "constructs";
+import * as crypto from "crypto";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -37,18 +38,36 @@ export class StrandsAgentStack extends cdk.Stack {
 		const entryDir = path.join(__dirname, "../functions/strands-agent");
 
 		// ── Python Lambda コードのバンドル ───────────────────────────────────────
-		// ローカルバンドリング (fast path, Docker 不要):
-		//   1. Python 3.10+ を探す (strands-agents は Python>=3.10 が必須)
-		//   2. pip install -r requirements.txt をホストで実行し outputDir へ展開
-		//   3. ソースファイルを outputDir へコピー
-		// Docker フォールバック (CI 等ローカル Python が使えない環境向け):
-		//   aws-lambda/python3.12 イメージで同様の処理を実行
+		// Docker バンドリング:
+		//   aws-lambda/python3.12 (Amazon Linux 2) イメージ上で pip install を実行
+		//   → ネイティブバイナリ (pydantic_core 等) が Lambda ランタイムと完全一致
+		// ローカルバンドリング (Docker 不可時のフォールバック):
+		//   --platform / --python-version / --only-binary で
+		//   manylinux x86_64 cp312 ホイールを強制ダウンロード
+		//
+		// アセットハッシュにソースファイルの内容 + バンドルバージョンを含め、
+		// バンドリング設定変更時にも Lambda コードが確実に更新されるようにする
+		const BUNDLE_VERSION = "v3"; // バンドリング修正時にインクリメント
+		const sourceFiles = fs
+			.readdirSync(entryDir)
+			.filter((f) => !f.startsWith(".") && f !== "__pycache__" && f !== "node_modules")
+			.sort()
+			.map((f) => {
+				const content = fs.readFileSync(path.join(entryDir, f));
+				return crypto.createHash("md5").update(content).digest("hex");
+			})
+			.join("");
+		const assetHash = crypto
+			.createHash("md5")
+			.update(sourceFiles + BUNDLE_VERSION)
+			.digest("hex");
+
 		const agentCode = lambda.Code.fromAsset(entryDir, {
+			assetHash,
+			assetHashType: cdk.AssetHashType.CUSTOM,
 			bundling: {
 				local: {
 					tryBundle(outputDir: string): boolean {
-						// Python 3.12 → 3.11 → 3.10 の順で利用可能なものを探す
-						// (strands-agents は Python>=3.10 が必要なため 3.9 は除外)
 						const pythonCandidates = ["python3.12", "python3.11", "python3.10"];
 						const pythonBin = pythonCandidates.find((bin) => {
 							const r = spawnSync(bin, ["--version"], { stdio: "pipe" });
@@ -56,7 +75,7 @@ export class StrandsAgentStack extends cdk.Stack {
 						});
 						if (!pythonBin) return false;
 
-						// 依存パッケージを outputDir へインストール
+						// pip install: Lambda x86_64 + Python 3.12 用ホイールを強制取得
 						const install = spawnSync(
 							pythonBin,
 							[
@@ -67,6 +86,14 @@ export class StrandsAgentStack extends cdk.Stack {
 								"requirements.txt",
 								"-t",
 								outputDir,
+								"--platform",
+								"manylinux2014_x86_64",
+								"--implementation",
+								"cp",
+								"--python-version",
+								"3.12",
+								"--only-binary",
+								":all:",
 								"--quiet",
 							],
 							{ cwd: entryDir, stdio: "inherit" },
@@ -144,6 +171,24 @@ export class StrandsAgentStack extends cdk.Stack {
 			},
 			deployOptions: {
 				stageName: "v1",
+			},
+		});
+
+		// Lambda エラー (5xx) 時にも CORS ヘッダーを返す
+		// Lambda がクラッシュすると API Gateway 自体がレスポンスを生成するため
+		// Gateway Response レベルで CORS を設定しないとブラウザに CORS エラーが出る
+		api.addGatewayResponse("Default5xx", {
+			type: apigw.ResponseType.DEFAULT_5XX,
+			responseHeaders: {
+				"Access-Control-Allow-Origin": "'*'",
+				"Access-Control-Allow-Headers": "'Content-Type'",
+			},
+		});
+		api.addGatewayResponse("Default4xx", {
+			type: apigw.ResponseType.DEFAULT_4XX,
+			responseHeaders: {
+				"Access-Control-Allow-Origin": "'*'",
+				"Access-Control-Allow-Headers": "'Content-Type'",
 			},
 		});
 

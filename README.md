@@ -377,7 +377,7 @@ npx cdk bootstrap
 #### 6. CdkStack のデプロイ
 
 ```bash
-PAY_TO_ADDRESS=0xYourAddress npx cdk deploy CdkStack
+PAY_TO_ADDRESS=0xYourAddress bunx cdk deploy CdkStack
 ```
 
 デプロイ完了後、以下の出力が表示されます：
@@ -411,13 +411,15 @@ curl -i https://xxxxxxxxxx.cloudfront.net/api/hello
 #### 1. SecretsStack のデプロイ
 
 ```bash
-npx cdk deploy SecretsStack
+bunx cdk deploy SecretsStack
 ```
 
 以下のようになればOK!
 
 ```bash
+✅  SecretsStack
 
+✨  Deployment time: 27.9s
 ```
 
 #### 2. EVM private key をシークレットに設定
@@ -435,25 +437,29 @@ aws secretsmanager put-secret-value \
 #### 3. PaymentProxyStack のデプロイ
 
 ```bash
-npx cdk deploy PaymentProxyStack
+bunx cdk deploy PaymentProxyStack
 ```
 
 以下のようになればOK!
 
 ```bash
+ ✅  PaymentProxyStack
 
+✨  Deployment time: 94.75s
 ```
 
 #### 4. AgentCoreGatewayStack のデプロイ
 
 ```bash
-npx cdk deploy AgentCoreGatewayStack
+bunx cdk deploy AgentCoreGatewayStack
 ```
 
 以下のようになればOK!
 
 ```bash
+✅  AgentCoreGatewayStack
 
+✨  Deployment time: 134.11s
 ```
 
 > **対応リージョン:** us-east-1 / us-east-2 / us-west-2 / ap-northeast-1 他
@@ -461,13 +467,15 @@ npx cdk deploy AgentCoreGatewayStack
 #### 5. StrandsAgentStack のデプロイ
 
 ```bash
-npx cdk deploy StrandsAgentStack
+bunx cdk deploy StrandsAgentStack
 ```
 
 以下のようになればOK!
 
 ```bash
+ ✅  StrandsAgentStack
 
+✨  Deployment time: 89.06s
 ```
 
 > **Bedrock モデルアクセスの有効化**
@@ -523,7 +531,7 @@ aws secretsmanager put-secret-value \
 npx cdk deploy CdkStack PaymentProxyStack AgentCoreGatewayStack StrandsAgentStack
 
 cd ../frontend && bun run build && cd ../cdk
-npx cdk deploy FrontendStack
+bunx cdk deploy FrontendStack
 ```
 
 ---

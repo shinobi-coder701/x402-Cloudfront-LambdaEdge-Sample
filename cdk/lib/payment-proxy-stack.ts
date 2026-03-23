@@ -62,14 +62,32 @@ export class PaymentProxyStack extends cdk.Stack {
 		props.evmPrivateKeySecret.grantRead(fn);
 
 		// API GatewayとLambda関数を紐付け
+		// proxy: false で個別リソースを定義する
+		// (proxy: true だと /{proxy+} のみが OpenAPI spec に登録され、
+		//  AgentCore Gateway の ToolFilter が個別パスを認識できない)
 		this.api = new apigw.LambdaRestApi(this, "PaymentProxyApi", {
 			handler: fn,
-			proxy: true,
+			proxy: false,
 			description: "x402 Payment Proxy API — wraps CloudFront paid endpoints",
 			deployOptions: {
 				stageName: "v1",
 			},
 		});
+
+		// /proxy/hello, /proxy/premium, /proxy/article を明示的に登録
+		// methodResponses を定義しないと OpenAPI spec に responses が含まれず
+		// AgentCore Gateway が "responses is missing" エラーを返す
+		const methodOptions: apigw.MethodOptions = {
+			methodResponses: [{ statusCode: "200" }],
+		};
+		const proxyResource = this.api.root.addResource("proxy");
+		proxyResource.addResource("hello").addMethod("GET", undefined, methodOptions);
+		proxyResource
+			.addResource("premium")
+			.addMethod("GET", undefined, methodOptions);
+		proxyResource
+			.addResource("article")
+			.addMethod("GET", undefined, methodOptions);
 
 		this.apiUrl = this.api.url;
 
