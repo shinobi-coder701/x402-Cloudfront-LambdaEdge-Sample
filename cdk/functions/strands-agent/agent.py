@@ -20,7 +20,7 @@ AWS_REGION = os.environ.get("AWS_REGION", "us-east-1")
 
 # BedrockModel を初期化（モデルIDは適宜変更）
 model = BedrockModel(
-    model_id="us.anthropic.claude-sonnet-4-6-20251101-v1:0",
+    model_id="us.anthropic.claude-haiku-4-5-20251001-v1:0",
     region_name=AWS_REGION,
 )
 

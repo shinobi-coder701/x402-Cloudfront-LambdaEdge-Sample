@@ -1,0 +1,157 @@
+<mxfile host="65bd71144e">
+    <diagram name="ページ-1" id="NTmkEtiyRnbs6a5v9BKK">
+        <mxGraphModel dx="939" dy="405" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2400" pageHeight="1500" background="#ffffff" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="title" value="x402 CloudFront + Lambda@Edge — AWS アーキテクチャ図 (us-east-1)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="148" y="20" width="2016" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="facilitator_box" value="x402 Facilitator&#xa;(外部サービス)&#xa;https://x402.org" style="rounded=1;fillColor=#FF9900;strokeColor=#CC7700;fontColor=#ffffff;fontStyle=1;fontSize=11;whiteSpace=wrap;" parent="1" vertex="1">
+                    <mxGeometry x="1963" y="159" width="200" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="basesepolia_box" value="Base Sepolia&#xa;(ブロックチェーン)&#xa;USDC 決済" style="rounded=1;fillColor=#627EEA;strokeColor=#4A5FC1;fontColor=#ffffff;fontStyle=1;fontSize=11;whiteSpace=wrap;" parent="1" vertex="1">
+                    <mxGeometry x="1963" y="309" width="200" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="bedrock_ext" value="Amazon Bedrock&lt;br&gt;(Claude)" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#01A88D;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.bedrock;fontStyle=1;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="635" y="1024" width="78" height="78" as="geometry"/>
+                </mxCell>
+                <mxCell id="frontendStackGrp" value="FrontendStack — React/Vite UI" style="swimlane;startSize=30;fillColor=#E8F4F9;strokeColor=#0066CC;fontStyle=1;fontSize=13;swimlaneLine=1;rounded=1;" parent="1" vertex="1">
+                    <mxGeometry x="200" y="215" width="470" height="240" as="geometry"/>
+                </mxCell>
+                <mxCell id="frontendS3" value="S3 Bucket&#xa;(ビルド済み)" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#3F8624;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.s3;fontStyle=1;fontSize=11;" parent="frontendStackGrp" vertex="1">
+                    <mxGeometry x="50" y="80" width="78" height="78" as="geometry"/>
+                </mxCell>
+                <mxCell id="frontendCF" value="CloudFront&#xa;(フロントエンド配信)" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#8C4FFF;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.cloudfront;fontStyle=1;fontSize=11;" parent="frontendStackGrp" vertex="1">
+                    <mxGeometry x="310" y="80" width="78" height="78" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_s3_cf_frontend" value="S3 Origin (OAC)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;dashed=1;" parent="frontendStackGrp" source="frontendS3" target="frontendCF" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="cdkStackGrp" value="CdkStack — x402 Payment Gate (us-east-1)" style="swimlane;startSize=30;fillColor=#FFF3E0;strokeColor=#FF9900;fontStyle=1;fontSize=13;swimlaneLine=1;rounded=1;" parent="1" vertex="1">
+                    <mxGeometry x="730" y="70" width="1140" height="460" as="geometry"/>
+                </mxCell>
+                <mxCell id="mainCF" value="CloudFront Distribution&#xa;/api/* /content/* 課金保護" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#8C4FFF;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.cloudfront;fontStyle=1;fontSize=11;" parent="cdkStackGrp" vertex="1">
+                    <mxGeometry x="60" y="160" width="78" height="78" as="geometry"/>
+                </mxCell>
+                <mxCell id="lambdaEdgeReq" value="Lambda@Edge&#xa;OriginRequest&#xa;x402 トークン検証" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#FF9900;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.lambda;fontStyle=1;fontSize=11;" parent="cdkStackGrp" vertex="1">
+                    <mxGeometry x="340" y="90" width="78" height="78" as="geometry"/>
+                </mxCell>
+                <mxCell id="lambdaEdgeRes" value="Lambda@Edge&#xa;OriginResponse&#xa;決済完了処理" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#FF9900;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.lambda;fontStyle=1;fontSize=11;" parent="cdkStackGrp" vertex="1">
+                    <mxGeometry x="340" y="300" width="78" height="78" as="geometry"/>
+                </mxCell>
+                <mxCell id="demoApiGW" value="API Gateway&#xa;DemoApi (v1)" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#E7157B;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.api_gateway;fontStyle=1;fontSize=11;" parent="cdkStackGrp" vertex="1">
+                    <mxGeometry x="700" y="160" width="78" height="78" as="geometry"/>
+                </mxCell>
+                <mxCell id="demoLambda" value="Lambda&#xa;DemoFunction&#xa;(Node.js 24)" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#FF9900;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.lambda;fontStyle=1;fontSize=11;" parent="cdkStackGrp" vertex="1">
+                    <mxGeometry x="970" y="160" width="78" height="78" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_cf_req" value="origin-request&#xa;(/api/* /content/*)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;" parent="cdkStackGrp" source="mainCF" target="lambdaEdgeReq" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_cf_res" value="origin-response" style="edgeStyle=orthogonalEdgeStyle;rounded=0;" parent="cdkStackGrp" source="mainCF" target="lambdaEdgeRes" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="239" y="199"/>
+                            <mxPoint x="239" y="339"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e_req_apigw" value="検証OK → 転送" style="edgeStyle=orthogonalEdgeStyle;rounded=0;" parent="cdkStackGrp" source="lambdaEdgeReq" target="demoApiGW" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_apigw_demolambda" value="invoke" style="edgeStyle=orthogonalEdgeStyle;rounded=0;" parent="cdkStackGrp" source="demoApiGW" target="demoLambda" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="secretsStackGrp" value="SecretsStack" style="swimlane;startSize=30;fillColor=#FFEBEE;strokeColor=#C62828;fontStyle=1;fontSize=13;swimlaneLine=1;rounded=1;" parent="1" vertex="1">
+                    <mxGeometry x="1827" y="700" width="280" height="180" as="geometry"/>
+                </mxCell>
+                <mxCell id="secretsMgr" value="Secrets Manager&#xa;x402/evm-private-key" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#DD344C;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.secrets_manager;fontStyle=1;fontSize=11;" parent="secretsStackGrp" vertex="1">
+                    <mxGeometry x="100" y="60" width="78" height="78" as="geometry"/>
+                </mxCell>
+                <mxCell id="strandsStackGrp" value="StrandsAgentStack — Strands Agent (Python 3.12)" style="swimlane;startSize=30;fillColor=#E8F5E9;strokeColor=#2E7D32;fontStyle=1;fontSize=13;swimlaneLine=1;rounded=1;" parent="1" vertex="1">
+                    <mxGeometry x="200" y="680" width="418" height="230" as="geometry"/>
+                </mxCell>
+                <mxCell id="strandsApiGW" value="API Gateway&#xa;StrandsAgentApi&#xa;POST /invoke" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#E7157B;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.api_gateway;fontStyle=1;fontSize=11;" parent="strandsStackGrp" vertex="1">
+                    <mxGeometry x="50" y="80" width="78" height="78" as="geometry"/>
+                </mxCell>
+                <mxCell id="strandsLambda" value="Lambda&#xa;StrandsAgent&#xa;(Python 3.12)" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#FF9900;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.lambda;fontStyle=1;fontSize=11;" parent="strandsStackGrp" vertex="1">
+                    <mxGeometry x="267" y="80" width="78" height="78" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_strands_apigw_lambda" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;" parent="strandsStackGrp" source="strandsApiGW" target="strandsLambda" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="agentCoreStackGrp" value="AgentCoreGatewayStack — MCP Server" style="swimlane;startSize=30;fillColor=#EDE7F6;strokeColor=#6A1B9A;fontStyle=1;fontSize=13;swimlaneLine=1;rounded=1;" parent="1" vertex="1">
+                    <mxGeometry x="750" y="680" width="360" height="230" as="geometry"/>
+                </mxCell>
+                <mxCell id="agentCoreGW" value="Bedrock AgentCore&#xa;Gateway&#xa;(MCP / IAM 認証)" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#01A88D;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.bedrock;fontStyle=1;fontSize=11;" parent="agentCoreStackGrp" vertex="1">
+                    <mxGeometry x="140" y="80" width="78" height="78" as="geometry"/>
+                </mxCell>
+                <mxCell id="paymentProxyStackGrp" value="PaymentProxyStack — x402 Auto-Pay Proxy" style="swimlane;startSize=30;fillColor=#FFF8E1;strokeColor=#F57F17;fontStyle=1;fontSize=13;swimlaneLine=1;rounded=1;" parent="1" vertex="1">
+                    <mxGeometry x="1210" y="680" width="482" height="230" as="geometry"/>
+                </mxCell>
+                <mxCell id="proxyApiGW" value="API Gateway&#xa;PaymentProxyApi&#xa;/proxy/hello|premium|article" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#E7157B;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.api_gateway;fontStyle=1;fontSize=11;" parent="paymentProxyStackGrp" vertex="1">
+                    <mxGeometry x="60" y="80" width="78" height="78" as="geometry"/>
+                </mxCell>
+                <mxCell id="proxyLambda" value="Lambda&#xa;PaymentProxy&#xa;(Node.js 22)" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#FF9900;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.lambda;fontStyle=1;fontSize=11;" parent="paymentProxyStackGrp" vertex="1">
+                    <mxGeometry x="297" y="80" width="78" height="78" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_proxy_apigw_lambda" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;" parent="paymentProxyStackGrp" source="proxyApiGW" target="proxyLambda" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="ex01" value="HTTPS" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#0066CC;fontColor=#0066CC;" parent="1" source="user" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="363" y="116.00000000000011" as="sourcePoint"/>
+                        <mxPoint x="549" y="295" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="ex02" value="HTTP リクエスト" style="edgeStyle=orthogonalEdgeStyle;rounded=0;" parent="1" source="user" target="mainCF" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="396" y="65" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="ex03" value="POST /invoke&#xa;(自然言語クエリ)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#2E7D32;fontColor=#2E7D32;" parent="1" source="frontendCF" target="strandsApiGW" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="ex04" value="MCP プロトコル&#xa;(SigV4 IAM 認証)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#6A1B9A;fontColor=#6A1B9A;" parent="1" source="strandsLambda" target="agentCoreGW" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="ex05" value="InvokeModel (Claude)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#01A88D;fontColor=#01A88D;" parent="1" source="strandsLambda" target="bedrock_ext" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="ex06" value="ツール呼び出し" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#F57F17;fontColor=#F57F17;" parent="1" source="agentCoreGW" target="proxyApiGW" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="ex07" value="秘密鍵読み取り" style="edgeStyle=orthogonalEdgeStyle;rounded=0;dashed=1;strokeColor=#C62828;fontColor=#C62828;" parent="1" source="proxyLambda" target="secretsMgr" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="ex08" value="x402 自動決済&#xa;(402→署名→リトライ)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;dashed=1;strokeColor=#FF9900;fontColor=#FF9900;" parent="1" source="proxyLambda" target="mainCF" edge="1">
+                    <mxGeometry x="0.0001" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                        <Array as="points">
+                            <mxPoint x="1659" y="560"/>
+                            <mxPoint x="829" y="560"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="ex09" value="支払いトークン検証" style="edgeStyle=orthogonalEdgeStyle;rounded=0;dashed=1;strokeColor=#FF9900;fontColor=#FF9900;" parent="1" source="lambdaEdgeReq" target="facilitator_box" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="ex10" value="決済完了通知" style="edgeStyle=orthogonalEdgeStyle;rounded=0;dashed=1;strokeColor=#FF9900;fontColor=#FF9900;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="lambdaEdgeRes" target="facilitator_box" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="1895" y="409"/>
+                            <mxPoint x="1895" y="199"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="ex11" value="USDC 決済" style="edgeStyle=orthogonalEdgeStyle;rounded=0;dashed=1;strokeColor=#627EEA;fontColor=#627EEA;" parent="1" source="facilitator_box" target="basesepolia_box" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="user" value="ユーザー" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#232F3E;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws4.user;fontStyle=1;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="519" y="79" width="60" height="80" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

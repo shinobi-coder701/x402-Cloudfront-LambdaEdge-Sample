@@ -714,3 +714,4 @@ curl -X POST https://xxxxxxxxxx.execute-api.us-east-1.amazonaws.com/v1/invoke \
 - [Strands Agents SDK](https://github.com/strands-agents/sdk-python)
 - [AWS Lambda@Edge ドキュメント](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-at-the-edge.html)
 - [Model Context Protocol (MCP)](https://modelcontextprotocol.io/)
+- [実際のトランザクション記録](https://sepolia.basescan.org/tx/0x9cdbb690d4740a30b98e7cc60ee45a819a909721f4c470ae25b808f510d3fc64)
