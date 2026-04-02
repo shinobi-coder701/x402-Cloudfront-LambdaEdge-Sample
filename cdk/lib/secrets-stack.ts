@@ -4,14 +4,20 @@ import { Construct } from "constructs";
 
 /**
  * Phase 1: SecretsStack
- * EVM private key を SecretsManager に安全に保管する。
+ * EVM / Solana 両方の秘密鍵を SecretsManager に安全に保管する。
+ *
  * デプロイ後、CLI で実際の値をセットする:
  *   aws secretsmanager put-secret-value \
  *     --secret-id x402/evm-private-key \
  *     --secret-string "0xYOUR_EVM_PRIVATE_KEY"
+ *
+ *   aws secretsmanager put-secret-value \
+ *     --secret-id x402/svm-private-key \
+ *     --secret-string "YOUR_SOLANA_PRIVATE_KEY_BASE58"
  */
 export class SecretsStack extends cdk.Stack {
 	public readonly evmPrivateKeySecret: secretsmanager.ISecret;
+	public readonly svmPrivateKeySecret: secretsmanager.ISecret;
 
 	/**
 	 * コンストラクター
@@ -32,14 +38,31 @@ export class SecretsStack extends cdk.Stack {
 			},
 		);
 
+		this.svmPrivateKeySecret = new secretsmanager.Secret(
+			this,
+			"SvmPrivateKey",
+			{
+				secretName: "x402/svm-private-key",
+				description:
+					"Solana private key for x402 payment signing (base58, Solana Devnet)",
+			},
+		);
+
 		// ===========================================================================
 		// 成果物
 		// ===========================================================================
 
-		new cdk.CfnOutput(this, "SecretArn", {
+		new cdk.CfnOutput(this, "EvmSecretArn", {
 			value: this.evmPrivateKeySecret.secretArn,
 			exportName: "X402EvmPrivateKeySecretArn",
 			description: "ARN of the EVM private key secret for x402 payment signing",
+		});
+
+		new cdk.CfnOutput(this, "SvmSecretArn", {
+			value: this.svmPrivateKeySecret.secretArn,
+			exportName: "X402SvmPrivateKeySecretArn",
+			description:
+				"ARN of the Solana private key secret for x402 payment signing",
 		});
 	}
 }

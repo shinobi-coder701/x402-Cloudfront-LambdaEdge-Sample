@@ -11,6 +11,8 @@ export interface PaymentProxyStackProps extends cdk.StackProps {
 	cloudFrontUrl: string;
 	/** EVM private key secret from SecretsStack */
 	evmPrivateKeySecret: secretsmanager.ISecret;
+	/** Solana private key secret from SecretsStack */
+	svmPrivateKeySecret: secretsmanager.ISecret;
 }
 
 /**
@@ -48,18 +50,28 @@ export class PaymentProxyStack extends cdk.Stack {
 			environment: {
 				CLOUDFRONT_URL: props.cloudFrontUrl,
 				EVM_PRIVATE_KEY_SECRET_ARN: props.evmPrivateKeySecret.secretArn,
+				SVM_PRIVATE_KEY_SECRET_ARN: props.svmPrivateKeySecret.secretArn,
 			},
 			bundling: {
-				// payment-proxy/package.json の依存をバンドルする
-				nodeModules: ["@x402/core", "@x402/evm", "@x402/fetch", "viem"],
+				// payment-proxy の依存をバンドルする（EVM + Solana 両対応）
+				nodeModules: [
+					"@x402/core",
+					"@x402/evm",
+					"@x402/svm",
+					"@x402/fetch",
+					"viem",
+					"@solana/web3.js",
+					"bs58",
+				],
 				externalModules: ["@aws-sdk/*"],
 			},
 			description:
 				"x402 payment proxy — auto-pays 402 responses before returning content",
 		});
 
-		// SecretsManager から EVM private key を読む権限
+		// SecretsManager から EVM / Solana private key を読む権限
 		props.evmPrivateKeySecret.grantRead(fn);
+		props.svmPrivateKeySecret.grantRead(fn);
 
 		// API GatewayとLambda関数を紐付け
 		// proxy: false で個別リソースを定義する

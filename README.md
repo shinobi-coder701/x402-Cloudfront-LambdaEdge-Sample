@@ -3,6 +3,8 @@
 > **x402 プロトコル**を使い、AWS CloudFront + Lambda@Edge でHTTPリクエストをマイクロペイメントでマネタイズするサンプル実装です。
 > アカウント不要・APIキー不要 — 暗号学的ペイメントプルーフだけでコンテンツへのアクセスを制御します。
 >
+> **Base Sepolia (EVM)** と **Solana Devnet** の両方をサポートし、クライアントはどちらのネットワークで支払っても OK です。
+>
 > さらに **Strands Agent × AgentCore Gateway (MCP)** を統合し、**AIエージェントが自律的にUSDCで支払いながらコンテンツを取得する** エンドツーエンドのデモを提供します。
 
 ---
@@ -98,7 +100,7 @@ React UI → Strands Agent → AgentCore Gateway (MCP) → Payment Proxy → Clo
 
 | スタック | ファイル | 役割 |
 |---------|---------|------|
-| `SecretsStack` | `lib/secrets-stack.ts` | EVM private key を SecretsManager で管理 |
+| `SecretsStack` | `lib/secrets-stack.ts` | EVM / Solana private key を SecretsManager で管理 |
 | `CdkStack` | `lib/cdk-stack.ts` | CloudFront + Lambda@Edge (x402 エッジゲートウェイ) |
 | `PaymentProxyStack` | `lib/payment-proxy-stack.ts` | x402 自動支払いプロキシ Lambda + API GW |
 | `AgentCoreGatewayStack` | `lib/agent-core-gateway-stack.ts` | AgentCore Gateway (MCP Server) |
@@ -241,13 +243,14 @@ sequenceDiagram
 | **CDN** | Amazon CloudFront | — |
 | **シークレット管理** | AWS Secrets Manager | — |
 | **フロントエンド** | React 19 + Vite 8 + framer-motion | — |
-| **x402 プロトコル** | @x402/core, @x402/evm, @x402/fetch | 2.2.0 |
+| **x402 プロトコル** | @x402/core, @x402/evm, @x402/svm, @x402/fetch | 2.2.0 |
 | **バンドラー** | esbuild | ^0.27.2 |
 | **言語** | TypeScript 5.9.3 / Python 3.12 | — |
 | **パッケージマネージャー** | Bun | latest |
 | **フォーマッター/リンター** | Biome | 2.4.8 |
 | **テスト** | Jest + ts-jest | 29.x |
 | **ブロックチェーン** | Base Sepolia (testnet) / Base (mainnet) | EVM |
+| **ブロックチェーン** | Solana Devnet (testnet) / Solana Mainnet | SVM |
 | **決済トークン** | USDC | — |
 
 ---
@@ -316,11 +319,14 @@ x402-Cloudfront-LambdaEdge-Sample/
 - [AWS CLI](https://aws.amazon.com/cli/) が設定済みであること（`aws configure`）
 - [Node.js](https://nodejs.org/) 20+ がインストール済みであること
 - Python 3.12 がインストール済みであること（Strands Agent Lambda ビルド用）
-- USDC を受け取るウォレットアドレス（Base Sepolia testnet 用）
+- USDC を受け取るウォレットアドレス（EVM / Solana それぞれ）
 - x402 支払い署名用 EVM ウォレットの秘密鍵（Payment Proxy 用）
+- x402 支払い署名用 Solana ウォレットの秘密鍵 base58 形式（Payment Proxy 用）
 
-> **Base Sepolia testnet の USDC を取得するには**
-> [Coinbase Faucet](https://faucet.circle.com/) で「Base Sepolia」を選択して USDC を取得してください。
+> **テストネット USDC の取得**
+>
+> - **Base Sepolia:** [Coinbase Faucet](https://faucet.circle.com/) で「Base Sepolia」を選択
+> - **Solana Devnet:** `solana airdrop 2 <WALLET_ADDRESS> --url devnet` で SOL を取得後、[spl-token faucet](https://spl-token-faucet.com/) で USDC を取得
 
 ---
 
@@ -352,13 +358,19 @@ cp .env.example .env
 `.env` を編集して以下の値を設定します：
 
 ```dotenv
-# 必須: 支払いを受け取るウォレットアドレス
-PAY_TO_ADDRESS=0xYourWalletAddressHere
+# 必須: EVM 支払いを受け取るウォレットアドレス
+PAY_TO_ADDRESS=0xYourEVMWalletAddressHere
 
-# 任意: ネットワーク（デフォルト: Base Sepolia testnet）
+# 必須: Solana 支払いを受け取るウォレットアドレス
+SVM_PAY_TO_ADDRESS=YourSolanaWalletAddressHere
+
+# 任意: EVM ネットワーク（デフォルト: Base Sepolia testnet）
 X402_NETWORK=eip155:84532
 
-# 任意: ファシリテーターURL（デフォルト: x402.org）
+# 任意: Solana ネットワーク（デフォルト: Solana Devnet）
+SOLANA_NETWORK=solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1
+
+# 任意: ファシリテーターURL（デフォルト: x402.org、testnet は EVM/Solana 共通）
 FACILITATOR_URL=https://x402.org/facilitator
 ```
 
@@ -422,17 +434,28 @@ bunx cdk deploy SecretsStack
 ✨  Deployment time: 27.9s
 ```
 
-#### 2. EVM private key をシークレットに設定
+#### 2. 秘密鍵をシークレットに設定
 
 Payment Proxy Lambda が x402 支払いに使用する秘密鍵を設定します。
-**このウォレットに Base Sepolia USDC を入金しておいてください。**
+**各ウォレットにテストネット USDC を入金しておいてください。**
 
 ```bash
-# 0xYOUR_EVM_PRIVATE_KEY の部分はあなたの秘密鍵に置き換えてください。
+# EVM 秘密鍵（Base Sepolia 用）
 aws secretsmanager put-secret-value \
   --secret-id x402/evm-private-key \
   --secret-string "0xYOUR_EVM_PRIVATE_KEY"
+
+# Solana 秘密鍵（Devnet 用、base58 形式）
+aws secretsmanager put-secret-value \
+  --secret-id x402/svm-private-key \
+  --secret-string "YOUR_SOLANA_BASE58_PRIVATE_KEY"
 ```
+
+> **Solana 秘密鍵の base58 エクスポート方法:**
+> ```bash
+> # Solana CLI を使っている場合
+> cat ~/.config/solana/id.json | python3 -c "import sys,json,base58; print(base58.b58encode(bytes(json.load(sys.stdin))).decode())"
+> ```
 
 #### 3. PaymentProxyStack のデプロイ
 
@@ -528,6 +551,12 @@ aws secretsmanager put-secret-value \
   --secret-id x402/evm-private-key \
   --secret-string "0xYOUR_EVM_PRIVATE_KEY"
 
+aws secretsmanager put-secret-value \
+  --secret-id x402/svm-private-key \
+  --secret-string "YOUR_SOLANA_BASE58_PRIVATE_KEY"
+
+PAY_TO_ADDRESS=0xYourEVMAddress \
+SVM_PAY_TO_ADDRESS=YourSolanaAddress \
 npx cdk deploy CdkStack PaymentProxyStack AgentCoreGatewayStack StrandsAgentStack
 
 cd ../frontend && bun run build && cd ../cdk
@@ -588,8 +617,11 @@ cp scripts/.env.example scripts/.env
 `scripts/.env` を編集：
 
 ```dotenv
-# Base Sepolia テストネット用ウォレットの秘密鍵
-EVM_PRIVATE_KEY=0x_YOUR_PRIVATE_KEY_HERE
+# EVM 秘密鍵（Base Sepolia テストネット用）
+EVM_PRIVATE_KEY=0x_YOUR_EVM_PRIVATE_KEY_HERE
+
+# Solana 秘密鍵（Solana Devnet 用、base58 形式）※ EVM または Solana どちらか一方でも可
+SVM_PRIVATE_KEY=YOUR_SOLANA_BASE58_PRIVATE_KEY_HERE
 
 # cdk deploy 後に出力される CloudFrontUrl
 CLOUDFRONT_URL=https://XXXXX.cloudfront.net
@@ -646,12 +678,14 @@ Response: {
 
 ### x402 エッジゲートウェイ（CdkStack）
 
-| パス | 支払い | 価格 | 説明 |
-|------|--------|------|------|
-| `GET /` | 不要 | 無料 | ウェルカムページ |
-| `GET /api/hello` | 必要 | $0.001 USDC | ハローエンドポイント |
-| `GET /api/premium/data` | 必要 | $0.01 USDC | プレミアムデータ |
-| `GET /content/article` | 必要 | $0.005 USDC | プレミアム記事 |
+| パス | 支払い | 価格 | 対応ネットワーク | 説明 |
+|------|--------|------|----------------|------|
+| `GET /` | 不要 | 無料 | — | ウェルカムページ |
+| `GET /api/hello` | 必要 | $0.001 USDC | Base Sepolia / Solana Devnet | ハローエンドポイント |
+| `GET /api/premium/data` | 必要 | $0.01 USDC | Base Sepolia / Solana Devnet | プレミアムデータ |
+| `GET /content/article` | 必要 | $0.005 USDC | Base Sepolia / Solana Devnet | プレミアム記事 |
+
+クライアントは 402 レスポンスの `accepts` リストから任意のネットワークを選択して支払えます。
 
 ### Payment Proxy（PaymentProxyStack）
 

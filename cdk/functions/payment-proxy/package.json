@@ -3,9 +3,12 @@
 	"version": "1.0.0",
 	"private": true,
 	"dependencies": {
+		"@solana/kit": "^5.5.1",
 		"@x402/core": "2.2.0",
 		"@x402/evm": "2.2.0",
 		"@x402/fetch": "2.2.0",
+		"@x402/svm": "2.2.0",
+		"bs58": "^6.0.0",
 		"viem": "^2.0.0"
 	},
 	"devDependencies": {

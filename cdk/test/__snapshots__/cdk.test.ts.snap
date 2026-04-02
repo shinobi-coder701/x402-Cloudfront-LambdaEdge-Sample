@@ -84,7 +84,7 @@ exports[`CdkStack matches snapshot 1`] = `
       },
     },
     "PaidEndpointContent": {
-      "Description": "Paid endpoint — $0.005 USDC (Base Sepolia)",
+      "Description": "Paid endpoint — $0.005 USDC (Base Sepolia or Solana Devnet)",
       "Value": {
         "Fn::Join": [
           "",
@@ -102,7 +102,7 @@ exports[`CdkStack matches snapshot 1`] = `
       },
     },
     "PaidEndpointHello": {
-      "Description": "Paid endpoint — $0.001 USDC (Base Sepolia)",
+      "Description": "Paid endpoint — $0.001 USDC (Base Sepolia or Solana Devnet)",
       "Value": {
         "Fn::Join": [
           "",
@@ -120,7 +120,7 @@ exports[`CdkStack matches snapshot 1`] = `
       },
     },
     "PaidEndpointPremium": {
-      "Description": "Paid endpoint — $0.01 USDC (Base Sepolia)",
+      "Description": "Paid endpoint — $0.01 USDC (Base Sepolia or Solana Devnet)",
       "Value": {
         "Fn::Join": [
           "",
@@ -583,7 +583,7 @@ exports[`CdkStack matches snapshot 1`] = `
       "Properties": {
         "Code": {
           "S3Bucket": "cdk-hnb659fds-assets-123456789012-us-east-1",
-          "S3Key": "bec52f60b315c74be2fe40e9272e863bfa4d18c66a2d8eec394ef02877e4aa5a.zip",
+          "S3Key": "b5216e4ba7d24425947974ed402ab730eab9f766ec6eddb5a5da970f9966f82d.zip",
         },
         "Description": "x402 demo origin — free and paid endpoints",
         "Handler": "index.handler",
@@ -593,7 +593,7 @@ exports[`CdkStack matches snapshot 1`] = `
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs24.x",
         "Tags": [
           {
             "Key": "Network",
@@ -679,13 +679,13 @@ exports[`CdkStack matches snapshot 1`] = `
                   "EventType": "origin-request",
                   "IncludeBody": false,
                   "LambdaFunctionARN": {
-                    "Ref": "OriginRequestFnCurrentVersionA6BCB5E6af147672bfe9f89bbe5cdcf4bcf22eb5",
+                    "Ref": "OriginRequestFnCurrentVersionA6BCB5E67d75172db9506493535f0a9dc5d877db",
                   },
                 },
                 {
                   "EventType": "origin-response",
                   "LambdaFunctionARN": {
-                    "Ref": "OriginResponseFnCurrentVersion56520FFB6e90a949867ae5588efb3b1c555b1c3b",
+                    "Ref": "OriginResponseFnCurrentVersion56520FFBd88146c38a30eb058823fc38792ec040",
                   },
                 },
               ],
@@ -715,13 +715,13 @@ exports[`CdkStack matches snapshot 1`] = `
                   "EventType": "origin-request",
                   "IncludeBody": false,
                   "LambdaFunctionARN": {
-                    "Ref": "OriginRequestFnCurrentVersionA6BCB5E6af147672bfe9f89bbe5cdcf4bcf22eb5",
+                    "Ref": "OriginRequestFnCurrentVersionA6BCB5E67d75172db9506493535f0a9dc5d877db",
                   },
                 },
                 {
                   "EventType": "origin-response",
                   "LambdaFunctionARN": {
-                    "Ref": "OriginResponseFnCurrentVersion56520FFB6e90a949867ae5588efb3b1c555b1c3b",
+                    "Ref": "OriginResponseFnCurrentVersion56520FFBd88146c38a30eb058823fc38792ec040",
                   },
                 },
               ],
@@ -825,7 +825,7 @@ exports[`CdkStack matches snapshot 1`] = `
               "HeaderBehavior": "none",
             },
             "QueryStringsConfig": {
-              "QueryStringBehavior": "all",
+              "QueryStringBehavior": "none",
             },
           },
         },
@@ -839,7 +839,7 @@ exports[`CdkStack matches snapshot 1`] = `
       "Properties": {
         "Code": {
           "S3Bucket": "cdk-hnb659fds-assets-123456789012-us-east-1",
-          "S3Key": "a8def1a47fcc157616915dc7660e41652d7e8c0c258e86ae274e0bfd850ed869.zip",
+          "S3Key": "dd86caed59c10d25755f56e891246ce5ba4cef3e57f948b2c4302c9f734c1b76.zip",
         },
         "Description": "x402 origin-request: verify payment before forwarding to origin",
         "Handler": "index.originRequestHandler",
@@ -850,7 +850,7 @@ exports[`CdkStack matches snapshot 1`] = `
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs24.x",
         "Tags": [
           {
             "Key": "Network",
@@ -869,7 +869,7 @@ exports[`CdkStack matches snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "OriginRequestFnCurrentVersionA6BCB5E6af147672bfe9f89bbe5cdcf4bcf22eb5": {
+    "OriginRequestFnCurrentVersionA6BCB5E67d75172db9506493535f0a9dc5d877db": {
       "Metadata": {
         "aws:cdk:do-not-refactor": true,
       },
@@ -939,7 +939,7 @@ exports[`CdkStack matches snapshot 1`] = `
       "Properties": {
         "Code": {
           "S3Bucket": "cdk-hnb659fds-assets-123456789012-us-east-1",
-          "S3Key": "a8def1a47fcc157616915dc7660e41652d7e8c0c258e86ae274e0bfd850ed869.zip",
+          "S3Key": "dd86caed59c10d25755f56e891246ce5ba4cef3e57f948b2c4302c9f734c1b76.zip",
         },
         "Description": "x402 origin-response: settle payment after origin succeeds",
         "Handler": "index.originResponseHandler",
@@ -950,7 +950,7 @@ exports[`CdkStack matches snapshot 1`] = `
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs24.x",
         "Tags": [
           {
             "Key": "Network",
@@ -969,7 +969,7 @@ exports[`CdkStack matches snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "OriginResponseFnCurrentVersion56520FFB6e90a949867ae5588efb3b1c555b1c3b": {
+    "OriginResponseFnCurrentVersion56520FFBd88146c38a30eb058823fc38792ec040": {
       "Metadata": {
         "aws:cdk:do-not-refactor": true,
       },

@@ -2,17 +2,18 @@ import type {
 	CloudFrontResponseEvent,
 	CloudFrontResponseResult,
 } from "aws-lambda";
-import { FACILITATOR_URL, NETWORK, ROUTES } from "./config";
+import { FACILITATOR_URL, NETWORK, SOLANA_NETWORK, ROUTES } from "./config";
 import {
 	createX402Middleware,
 	MiddlewareResultType,
 	type LambdaEdgeResponse,
 } from "./lib";
 
-// x402のミドルウェアを作成
+// x402のミドルウェアを作成（EVM + Solana 両対応）
 const x402 = createX402Middleware({
 	facilitatorUrl: FACILITATOR_URL,
 	network: NETWORK,
+	solanaNetwork: SOLANA_NETWORK,
 	routes: ROUTES,
 });
 

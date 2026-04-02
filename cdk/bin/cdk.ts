@@ -12,16 +12,20 @@
  *
  * Required environment variables (read at synth time, baked into Lambda@Edge bundle):
  *
- *   PAY_TO_ADDRESS   Wallet address to receive USDC payments
- *                    e.g. export PAY_TO_ADDRESS=0xYourAddress
+ *   PAY_TO_ADDRESS      EVM wallet address to receive USDC payments
+ *                       e.g. export PAY_TO_ADDRESS=0xYourAddress
+ *   SVM_PAY_TO_ADDRESS  Solana wallet address to receive USDC payments
+ *                       e.g. export SVM_PAY_TO_ADDRESS=YourSolanaAddress
  *
  * Optional:
- *   X402_NETWORK     CAIP-2 network ID  (default: eip155:84532 = Base Sepolia)
- *   FACILITATOR_URL  x402 facilitator   (default: https://x402.org/facilitator)
+ *   X402_NETWORK     CAIP-2 EVM network ID    (default: eip155:84532 = Base Sepolia)
+ *   SOLANA_NETWORK   CAIP-2 Solana network ID (default: solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1 = Devnet)
+ *   FACILITATOR_URL  x402 facilitator         (default: https://x402.org/facilitator)
  *
  * Deploy order:
  *   1. npx cdk deploy SecretsStack
  *   2. aws secretsmanager put-secret-value --secret-id x402/evm-private-key --secret-string "0x..."
+ *      aws secretsmanager put-secret-value --secret-id x402/svm-private-key --secret-string "BASE58_KEY"
  *   3. npx cdk deploy CdkStack PaymentProxyStack AgentCoreGatewayStack StrandsAgentStack
  *   4. cd frontend && bun run build
  *   5. npx cdk deploy FrontendStack
@@ -47,6 +51,7 @@ const secretsStack = new SecretsStack(app, "SecretsStack", { env });
 const paymentProxyStack = new PaymentProxyStack(app, "PaymentProxyStack", {
 	cloudFrontUrl: cdkStack.cloudFrontUrl,
 	evmPrivateKeySecret: secretsStack.evmPrivateKeySecret,
+	svmPrivateKeySecret: secretsStack.svmPrivateKeySecret,
 	env,
 });
 
