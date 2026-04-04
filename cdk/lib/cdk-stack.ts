@@ -28,6 +28,9 @@ dotenv.config();
  * このスタックはすべてのリソースをus-east-1に配置することで、デモをシンプルに保っています。
  */
 export class CdkStack extends cdk.Stack {
+	/** CloudFront distribution URL — used by PaymentProxyStack as the payment target */
+	public readonly cloudFrontUrl: string;
+
 	/**
 	 * コンストラクター
 	 * @param scope
@@ -51,7 +54,12 @@ export class CdkStack extends cdk.Stack {
 		// via esbuild --define (Lambda@Edge does not support runtime env vars).
 		const payToAddress =
 			process.env.PAY_TO_ADDRESS ?? "0xYourPaymentAddressHere";
+		const svmPayToAddress =
+			process.env.SVM_PAY_TO_ADDRESS ?? "YourSolanaPaymentAddressHere";
 		const network = process.env.X402_NETWORK ?? "eip155:84532";
+		const solanaNetwork =
+			process.env.SOLANA_NETWORK ??
+			"solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1";
 		const facilitatorUrl =
 			process.env.FACILITATOR_URL ?? "https://x402.org/facilitator";
 
@@ -102,7 +110,9 @@ export class CdkStack extends cdk.Stack {
 		// interprets as a JS string literal — exactly what we want.
 		const defineArgs = [
 			`--define:__PAY_TO_ADDRESS__=${JSON.stringify(payToAddress)}`,
+			`--define:__SVM_PAY_TO_ADDRESS__=${JSON.stringify(svmPayToAddress)}`,
 			`--define:__X402_NETWORK__=${JSON.stringify(network)}`,
+			`--define:__SOLANA_NETWORK__=${JSON.stringify(solanaNetwork)}`,
 			`--define:__FACILITATOR_URL__=${JSON.stringify(facilitatorUrl)}`,
 		];
 
@@ -271,9 +281,11 @@ export class CdkStack extends cdk.Stack {
 			},
 		});
 
-    // ================================================================================
+		this.cloudFrontUrl = `https://${distribution.distributionDomainName}`;
+
+		// ================================================================================
 		// ── Outputs ───────────────────────────────────────────────────────────────
-    // ================================================================================
+		// ================================================================================
 
 		new cdk.CfnOutput(this, "CloudFrontUrl", {
 			value: `https://${distribution.distributionDomainName}`,
@@ -294,17 +306,19 @@ export class CdkStack extends cdk.Stack {
 
 		new cdk.CfnOutput(this, "PaidEndpointHello", {
 			value: `https://${distribution.distributionDomainName}/api/hello`,
-			description: "Paid endpoint — $0.001 USDC (Base Sepolia)",
+			description:
+				"Paid endpoint — $0.001 USDC (Base Sepolia or Solana Devnet)",
 		});
 
 		new cdk.CfnOutput(this, "PaidEndpointPremium", {
 			value: `https://${distribution.distributionDomainName}/api/premium/data`,
-			description: "Paid endpoint — $0.01 USDC (Base Sepolia)",
+			description: "Paid endpoint — $0.01 USDC (Base Sepolia or Solana Devnet)",
 		});
 
 		new cdk.CfnOutput(this, "PaidEndpointContent", {
 			value: `https://${distribution.distributionDomainName}/content/article`,
-			description: "Paid endpoint — $0.005 USDC (Base Sepolia)",
+			description:
+				"Paid endpoint — $0.005 USDC (Base Sepolia or Solana Devnet)",
 		});
 
 		cdk.Tags.of(this).add("Project", "x402-cloudfront-demo");

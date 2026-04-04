@@ -1,0 +1,4 @@
+strands-agents>=1.32.0
+mcp>=1.23.0
+mcp-proxy-for-aws
+boto3>=1.35.0

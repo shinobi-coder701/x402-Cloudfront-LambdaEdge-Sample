@@ -76,10 +76,12 @@ x402.register("eip155:*", new ExactEvmScheme(signer));
  */
 async function getUsdcBalance(): Promise<number | null> {
   try {
+    // パブリッククライアント
     const publicClient = createPublicClient({
       chain: baseSepolia,
       transport: http(),
     });
+    // 残高取得
     const balance = await publicClient.readContract({
       address: USDC_BASE_SEPOLIA,
       abi: erc20Abi,
@@ -125,7 +127,7 @@ async function step1_showPaymentRequired(): Promise<boolean> {
   console.log("Step 1: 支払いなしでリクエスト → 402 Payment Required");
   console.log(LINE);
   console.log("URL: " + targetUrl + "\n");
-
+  // APIを呼び出す
   const res = await fetch(targetUrl);
   console.log("Status: " + res.status + " " + res.statusText);
 
@@ -292,7 +294,9 @@ console.log(
 console.log("Endpoint: " + endpoint);
 
 if (isFullPay) {
+  // 支払いペイロードを生成して署名 → 決済 → 再送 → オリジンからレスポンスを取得
   await fullPayment();
 } else {
+  // 支払いペイロードを生成して署名 → シグネチャをキャプチャ（決済はしない）
   await generatePayloadOnly();
 }

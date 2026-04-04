@@ -10,12 +10,21 @@
     "generate:content": "bun run generate-payment.ts /content/article",
     "pay": "bun run generate-payment.ts --pay",
     "pay:premium": "bun run generate-payment.ts /api/premium/data --pay",
-    "pay:content": "bun run generate-payment.ts /content/article --pay"
+    "pay:content": "bun run generate-payment.ts /content/article --pay",
+    "generate:sol": "bun run generate-payment-solana.ts",
+    "generate:sol:premium": "bun run generate-payment-solana.ts /api/premium/data",
+    "generate:sol:content": "bun run generate-payment-solana.ts /content/article",
+    "pay:sol": "bun run generate-payment-solana.ts --pay",
+    "pay:sol:premium": "bun run generate-payment-solana.ts /api/premium/data --pay",
+    "pay:sol:content": "bun run generate-payment-solana.ts /content/article --pay"
   },
   "dependencies": {
+    "@scure/base": "^1.2.4",
+    "@solana/kit": "^5.5.1",
     "@x402/core": "2.2.0",
     "@x402/evm": "2.2.0",
     "@x402/fetch": "2.2.0",
+    "@x402/svm": "2.2.0",
     "dotenv": "^17.3.1",
     "viem": "^2.0.0"
   },

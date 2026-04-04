@@ -1,7 +1,7 @@
-import type { CloudFrontRequest, CloudFrontResponse } from "aws-lambda";
 import type { x402HTTPResourceServer } from "@x402/core/server";
+import type { CloudFrontRequest, CloudFrontResponse } from "aws-lambda";
 import { CloudFrontHTTPAdapter } from "./adapter";
-import { toLambdaResponse, LambdaEdgeResponse } from "./responses";
+import { LambdaEdgeResponse, toLambdaResponse } from "./responses";
 import { createX402Server, type X402ServerConfig } from "./server";
 
 /**
@@ -94,6 +94,13 @@ const PENDING_SETTLEMENT_HEADER = "x-x402-pending-settlement";
 export function createX402Middleware(config: X402ServerConfig) {
 	let serverPromise: Promise<x402HTTPResourceServer> | null = null;
 
+	/**
+	 * x402サーバーのインスタンスを取得（キャッシュ付き）
+	 *
+	 * 初回呼び出し時にサーバーを作成し、以降は同じインスタンスを返す。
+	 * Lambdaのコールドスタートを考慮した最適化。
+	 * @returns
+	 */
 	const getServer = async (): Promise<x402HTTPResourceServer> => {
 		if (!serverPromise) {
 			serverPromise = createX402Server(config);
@@ -102,7 +109,7 @@ export function createX402Middleware(config: X402ServerConfig) {
 	};
 
 	/**
-	 * Process origin-request for x402 payment verification.
+	 * x402のorigin-request処理。署名の検証と支払い要件のチェックを行う。
 	 *
 	 * @param request - CloudFront request object
 	 * @param distributionDomain - CloudFront distribution domain name
@@ -118,9 +125,12 @@ export function createX402Middleware(config: X402ServerConfig) {
 		delete request.headers[PENDING_SETTLEMENT_HEADER];
 
 		try {
+			// x402サーバーを取得しする
 			const server = await getServer();
+			// CloudFrontのリクエストとドメインをアダプターでHTTPサーバー用のコンテキストに変換
 			const adapter = new CloudFrontHTTPAdapter(request, distributionDomain);
 
+			// contextには、HTTPサーバーが必要とする情報を渡す（パス、メソッド、支払い署名など）
 			const context = {
 				adapter,
 				path: adapter.getPath(),
@@ -128,6 +138,7 @@ export function createX402Middleware(config: X402ServerConfig) {
 				paymentHeader: adapter.getHeader("payment-signature"),
 			};
 
+			// x402サーバーでHTTPリクエストを処理し、支払いの必要性と有効性を判断
 			const result = await server.processHTTPRequest(context);
 
 			switch (result.type) {
@@ -216,6 +227,7 @@ export function createX402Middleware(config: X402ServerConfig) {
 			);
 
 			const server = await getServer();
+			// CloudFrontのリクエストとレスポンスをアダプターでHTTPサーバー用のコンテキストに変換
 			const settlement = await server.processSettlement(
 				paymentData.payload,
 				paymentData.requirements,
