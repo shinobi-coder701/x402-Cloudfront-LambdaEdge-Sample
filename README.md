@@ -61,6 +61,8 @@ React UI → Strands Agent → AgentCore Gateway (MCP) → Payment Proxy → Clo
 
 ## 全体アーキテクチャ
 
+![](./docs/overview.png)
+
 ```
 ┌──────────────────────────────────────────────────────────────────┐
 │  [FrontendStack]  CloudFront (S3)                                │
