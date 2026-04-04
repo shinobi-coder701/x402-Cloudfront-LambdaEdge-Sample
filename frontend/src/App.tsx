@@ -1,8 +1,8 @@
-import { useAgent } from "./hooks/useAgent";
-import { StatusBar } from "./components/StatusBar";
 import { ChatPanel } from "./components/ChatPanel";
 import { PaymentLedger } from "./components/PaymentLedger";
-import "./App.css";
+import { StatusBar } from "./components/StatusBar";
+import "./css/App.css";
+import { useAgent } from "./hooks/useAgent";
 
 function App() {
   const { messages, payments, isLoading, sendMessage } = useAgent();
