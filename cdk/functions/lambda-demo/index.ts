@@ -50,6 +50,8 @@ export const handler = async (
 					},
 				],
 			},
+			// ネットワークとプロトコルの情報を追加 
+			// Solana Devnet の場合は "Solana Devnet (eip155:101)"、Base Sepolia の場合は "Base Sepolia (eip155:84532)"
 			network: "Base Sepolia (eip155:84532)",
 			protocol: "x402 v2",
 		});
@@ -86,7 +88,7 @@ export const handler = async (
 		return cors(200, {
 			title: "The Future of AI Micropayments",
 			content:
-				"x402 enables AI agents to autonomously pay for APIs using USDC on Base. " +
+				"x402 enables AI agents to autonomously pay for APIs using USDC on Solana or Base. " +
 				"No accounts, no API keys — just cryptographic payment proofs verified on-chain.",
 			author: "x402 Demo",
 			publishedAt: "2026-01-01",
@@ -110,7 +112,7 @@ function cors(statusCode: number, body: unknown): APIGatewayProxyResult {
 			"Content-Type": "application/json",
 			"Access-Control-Allow-Origin": "*",
 			"Access-Control-Allow-Headers":
-				"Content-Type,Payment-Signature,X-Payment-Response",
+				"Content-Type,Payment-Signature,X-Payment-Response", // 402が要求するヘッダーを許可
 			"Access-Control-Allow-Methods": "GET,OPTIONS",
 		},
 		body: body !== null ? JSON.stringify(body) : undefined,
