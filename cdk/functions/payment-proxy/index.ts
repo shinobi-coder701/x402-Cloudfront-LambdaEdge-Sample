@@ -2,12 +2,12 @@ import {
 	GetSecretValueCommand,
 	SecretsManagerClient,
 } from "@aws-sdk/client-secrets-manager";
+import { createKeyPairSignerFromBytes } from "@solana/kit";
 import { x402Client } from "@x402/core/client";
 import { ExactEvmScheme } from "@x402/evm/exact/client";
-import { ExactSvmScheme } from "@x402/svm/exact/client";
 import { wrapFetchWithPayment } from "@x402/fetch";
+import { ExactSvmScheme } from "@x402/svm/exact/client";
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { createKeyPairSignerFromBytes } from "@solana/kit";
 import bs58 from "bs58";
 import { privateKeyToAccount } from "viem/accounts";
 
@@ -34,7 +34,7 @@ let payFetch: typeof fetch | null = null;
  */
 async function getPayFetch(): Promise<typeof fetch> {
 	if (payFetch) return payFetch;
-
+	// AWS Secrets Manager クライアントを初期化
 	const sm = new SecretsManagerClient({});
 
 	// EVM 秘密鍵と Solana 秘密鍵を並行取得
@@ -60,7 +60,7 @@ async function getPayFetch(): Promise<typeof fetch> {
 		bs58.decode(svmSecret.SecretString),
 	);
 
-	// x402 クライアントに EVM と Solana の両スキームを登録
+	// x402 クライアントに EVM と Solana の両スキームを登録(両方に対応できるように)
 	const client = new x402Client();
 	client.register("eip155:*", new ExactEvmScheme(evmSigner));
 	client.register("solana:*", new ExactSvmScheme(svmSigner));

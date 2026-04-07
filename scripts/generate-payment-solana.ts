@@ -22,13 +22,13 @@
  *   bun run pay:sol               # /api/hello フル支払い（Solana）
  */
 
-import events from "node:events";
-import { x402Client } from "@x402/core/client";
-import { ExactSvmScheme } from "@x402/svm/exact/client";
-import { wrapFetchWithPayment } from "@x402/fetch";
-import { createKeyPairSignerFromBytes } from "@solana/kit";
 import { base58 } from "@scure/base";
+import { createKeyPairSignerFromBytes } from "@solana/kit";
+import { x402Client } from "@x402/core/client";
+import { wrapFetchWithPayment } from "@x402/fetch";
+import { ExactSvmScheme } from "@x402/svm/exact/client";
 import dotenv from "dotenv";
+import events from "node:events";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -98,6 +98,7 @@ x402.register("solana:*", new ExactSvmScheme(signer));
  */
 async function getUsdcBalance(): Promise<number | null> {
   try {
+    // RPC に直接リクエストして USDC トークンアカウントを取得
     const response = await fetch(SOLANA_DEVNET_RPC, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
