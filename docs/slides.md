@@ -737,7 +737,7 @@ AgentCore + Strands Agent で AI が自律的に支払う
 
 ---
 
-## CDK スタック構成 — 依存関係
+## CDK スタック構成 — インフラ管理もソースコードで！
 
 <div class="columns col-6-4">
 <div>
@@ -832,7 +832,6 @@ MPP / Tempo 等の登場で
 
 ## 知見 2 — 秘密鍵管理は普遍の課題
 
-<div class="columns">
 <div>
 
 ### 今回の対策
@@ -854,30 +853,6 @@ MPP / Tempo 等の登場で
 </tbody>
 </table>
 
-</div>
-<div>
-
-<div class="card danger">
-
-### 本質的な課題
-
-**「エージェントが自律的に支払う」= <br/>エージェントが秘密鍵を保持**
-
-これは Web2 でいえばパスワードを
-アプリに持たせるのと同じ問題
-
-</div>
-
-<div class="card accent" style="margin-top:14px">
-
-### 今後の方向性
-MPC / AA（Account Abstraction）との
-組み合わせが鍵になりそう
-
-</div>
-
-</div>
-</div>
 
 ---
 
@@ -895,17 +870,17 @@ MPC / AA（Account Abstraction）との
 <div class="card accent">
 
 ### x402
-**HTTPレイヤーの<br/>決済プロトコル**
 
-- 払ったら通すという仕組み
+- HTTPプロトコル上で決済
 - オープン仕様
-- エッジ・AIエージェント・MCPなど様々なレイヤーで採用可能
+- 様々なレイヤーで採用可能
+  - MCPサーバー
+  - エッジ関数
 
 </div>
 <div class="card warn">
 
 ### MPP
-**マルチパーティペイメント**
 
 - 複数の支払い経路・条件を抽象化
 - x402 をトランスポートとして利用できる
@@ -915,11 +890,10 @@ MPC / AA（Account Abstraction）との
 <div class="card success">
 
 ### Tempo
-**決済スケジューリング<br/> & フロー**
 
-- 定期課金・サブスクモデル
+- マルチステーブルコイン
 - x402 の「1リクエスト<br/>1決済」を補完
-- ストリーミング決済も
+- ストリーミング決済も可
 
 </div>
 </div>
