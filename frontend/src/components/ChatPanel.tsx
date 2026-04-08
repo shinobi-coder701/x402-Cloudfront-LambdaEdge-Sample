@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import type { Message } from "../types";
 import { MessageBubble } from "./MessageBubble";
 import { ThinkingDots } from "./ThinkingDots";
@@ -44,7 +44,7 @@ export function ChatPanel({ messages, isLoading, onSend }: ChatPanelProps) {
           <div className="chat-welcome">
             <p className="welcome-title">x402 AI Agent</p>
             <p className="welcome-desc">
-              Ask me to access premium content. I'll pay automatically using USDC on Base Sepolia.
+              Ask me to access premium content. I'll pay automatically using USDC.
             </p>
             <div className="suggestions">
               {SUGGESTIONS.map((s) => (
