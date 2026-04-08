@@ -21,12 +21,6 @@ export function PaymentLedger({ payments }: PaymentLedgerProps) {
         </div>
       </div>
 
-      <div className="ledger-network">
-        <span className="network-dot" />
-        <span>Base Sepolia</span>
-        <span className="network-badge">TESTNET</span>
-      </div>
-
       <div className="ledger-cards">
         {payments.length === 0 ? (
           <p className="ledger-empty">No payments yet. Ask the agent to fetch content.</p>

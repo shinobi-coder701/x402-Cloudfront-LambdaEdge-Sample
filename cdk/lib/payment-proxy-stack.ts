@@ -60,7 +60,7 @@ export class PaymentProxyStack extends cdk.Stack {
 					"@x402/svm",
 					"@x402/fetch",
 					"viem",
-					"@solana/web3.js",
+					"@solana/kit",
 					"bs58",
 				],
 				externalModules: ["@aws-sdk/*"],

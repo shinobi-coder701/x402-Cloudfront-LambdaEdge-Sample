@@ -77,27 +77,20 @@ export class FrontendStack extends cdk.Stack {
 			},
 		);
 
-		// ビルド済みフロントエンドを S3 に配置
+		// ビルド済みフロントエンド + ランタイム設定 (config.json) を1回で S3 に配置
+		// ※ sources に複数指定すると zip をマージしてアップロードされる
+		// ※ BucketDeployment を分割すると実行順序不定により一方が他のファイルを
+		//    prune してしまうため、必ず1つの BucketDeployment にまとめること
 		new s3deploy.BucketDeployment(this, "DeployFrontend", {
 			sources: [
 				s3deploy.Source.asset(path.join(__dirname, "../../frontend/dist")),
-			],
-			destinationBucket: bucket,
-			distribution,
-			distributionPaths: ["/*"],
-		});
-
-		// ランタイム設定を config.json として S3 に配置
-		// → React アプリが起動時に fetch('/config.json') で取得する
-		new s3deploy.BucketDeployment(this, "DeployConfig", {
-			sources: [
 				s3deploy.Source.jsonData("config.json", {
 					strandsAgentApiUrl: props.strandsAgentApiUrl,
 				}),
 			],
 			destinationBucket: bucket,
 			distribution,
-			distributionPaths: ["/config.json"],
+			distributionPaths: ["/*"],
 		});
 
 		this.frontendUrl = `https://${distribution.distributionDomainName}`;

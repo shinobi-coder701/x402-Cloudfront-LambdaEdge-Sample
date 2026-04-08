@@ -13,7 +13,6 @@ export function StatusBar({ isLoading }: StatusBarProps) {
       <div className="status-right">
         <span className={`status-indicator ${isLoading ? "active" : "idle"}`} />
         <span className="status-text">{isLoading ? "AGENT THINKING" : "READY"}</span>
-        <span className="status-network">Base Sepolia</span>
       </div>
     </header>
   );

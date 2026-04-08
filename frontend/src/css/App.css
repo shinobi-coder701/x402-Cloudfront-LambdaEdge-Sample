@@ -107,16 +107,6 @@ html, body, #root {
   color: var(--text-secondary);
 }
 
-.status-network {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  padding: 2px 8px;
-  border: 1px solid var(--border-bright);
-  border-radius: var(--radius-sm);
-  color: var(--purple);
-  letter-spacing: 0.08em;
-}
-
 /* ── Chat Panel ──────────────────────────────────────────────────────────── */
 .chat-panel {
   flex: 1;
@@ -341,35 +331,6 @@ html, body, #root {
   font-family: var(--font-mono);
   font-size: 11px;
   color: var(--text-secondary);
-}
-
-.ledger-network {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 8px 18px;
-  border-bottom: 1px solid var(--border);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text-secondary);
-}
-
-.network-dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--teal);
-  box-shadow: 0 0 5px var(--teal);
-  flex-shrink: 0;
-}
-
-.network-badge {
-  margin-left: auto;
-  font-size: 9px;
-  letter-spacing: 0.12em;
-  padding: 1px 6px;
-  border: 1px solid var(--border-bright);
-  border-radius: var(--radius-sm);
-  color: var(--purple);
 }
 
 .ledger-cards {
