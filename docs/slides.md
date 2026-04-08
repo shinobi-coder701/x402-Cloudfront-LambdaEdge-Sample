@@ -661,7 +661,7 @@ CDK でインフラをコード化
 <div class="card success">
 
 ### 公式ドキュメント掲載
-Coinbase x402 公式でも<br/>紹介された構成
+x402 公式GitHubでも<br/>紹介された構成
 
 </div>
 </div>
