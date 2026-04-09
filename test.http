@@ -13,14 +13,16 @@
 # cdk deploy 後に出力される URL を設定してください
 
 # CloudFront URL（x402 支払いチェックあり）
-@cloudfrontUrl = https://d7fozeailth4i.cloudfront.net
+@cloudfrontUrl = https://d2439dejv9z7tc.cloudfront.net
 
 # API Gateway URL（支払いチェックなし — デバッグ用）
-@apiGatewayUrl = https://k15fapbnej.execute-api.us-east-1.amazonaws.com/v1/
+@apiGatewayUrl = https://7kwmbpyua7.execute-api.us-east-1.amazonaws.com/v1/
 
 # x402 支払いペイロード（署名済み）— Step 3 で使用
 # 実際の値は x402 クライアントライブラリで生成する（下部の「支払いペイロード生成方法」を参照）
 @paymentPayload = REPLACE_WITH_BASE64_ENCODED_PAYMENT_PAYLOAD
+
+@mcpUrl=https://x402-payment-gateway-aupc8pvyym.gateway.bedrock-agentcore.us-east-1.amazonaws.com/mcp
 
 
 # ════════════════════════════════════════════════════════════════════════════════
@@ -164,3 +166,10 @@ Access-Control-Request-Headers: Payment-Signature
 #
 # テスト用 USDC 取得:
 #   https://faucet.circle.com/ (Base Sepolia 選択)
+
+# ════════════════════════════════════════════════════════════════════════════════
+# MCP Server
+# ════════════════════════════════════════════════════════════════════════════════
+
+### GET / — MCP サーバーのヘルスチェック
+GET {{mcpUrl}}/api/hello

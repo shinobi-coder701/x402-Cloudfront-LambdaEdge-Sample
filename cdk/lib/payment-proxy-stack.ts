@@ -49,17 +49,14 @@ export class PaymentProxyStack extends cdk.Stack {
 			timeout: cdk.Duration.seconds(30),
 			environment: {
 				CLOUDFRONT_URL: props.cloudFrontUrl,
-				EVM_PRIVATE_KEY_SECRET_ARN: props.evmPrivateKeySecret.secretArn,
 				SVM_PRIVATE_KEY_SECRET_ARN: props.svmPrivateKeySecret.secretArn,
 			},
 			bundling: {
-				// payment-proxy の依存をバンドルする（EVM + Solana 両対応）
+				// payment-proxy の依存をバンドルする（Solana 対応）
 				nodeModules: [
 					"@x402/core",
-					"@x402/evm",
 					"@x402/svm",
 					"@x402/fetch",
-					"viem",
 					"@solana/kit",
 					"bs58",
 				],
@@ -69,8 +66,7 @@ export class PaymentProxyStack extends cdk.Stack {
 				"x402 payment proxy — auto-pays 402 responses before returning content",
 		});
 
-		// SecretsManager から EVM / Solana private key を読む権限
-		props.evmPrivateKeySecret.grantRead(fn);
+		// SecretsManager から Solana private key を読む権限
 		props.svmPrivateKeySecret.grantRead(fn);
 
 		// API GatewayとLambda関数を紐付け

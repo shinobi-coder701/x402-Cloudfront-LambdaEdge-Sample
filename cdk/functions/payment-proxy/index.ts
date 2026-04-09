@@ -4,16 +4,13 @@ import {
 } from "@aws-sdk/client-secrets-manager";
 import { createKeyPairSignerFromBytes } from "@solana/kit";
 import { x402Client } from "@x402/core/client";
-import { ExactEvmScheme } from "@x402/evm/exact/client";
 import { wrapFetchWithPayment } from "@x402/fetch";
 import { ExactSvmScheme } from "@x402/svm/exact/client";
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import bs58 from "bs58";
-import { privateKeyToAccount } from "viem/accounts";
 
 // 環境変数から CloudFront URL と秘密鍵の ARN を取得
 const CLOUDFRONT_URL = process.env.CLOUDFRONT_URL!;
-const EVM_SECRET_ARN = process.env.EVM_PRIVATE_KEY_SECRET_ARN!;
 const SVM_SECRET_ARN = process.env.SVM_PRIVATE_KEY_SECRET_ARN!;
 
 // ルートマッピング: プロキシパス → CloudFront パス
@@ -28,8 +25,7 @@ let payFetch: typeof fetch | null = null;
 
 /**
  * 支払いクライアントを初期化して fetch をラップする関数。
- * EVM (Base Sepolia) と Solana (Devnet) の両方を登録し、
- * x402 クライアントが 402 レスポンスの accepts から自動的に適切なスキームを選択する。
+ * Solana (Devnet) のみ登録し、x402 クライアントが Solana で支払いを行う。
  * @returns ラップされた fetch 関数
  */
 async function getPayFetch(): Promise<typeof fetch> {
@@ -37,32 +33,22 @@ async function getPayFetch(): Promise<typeof fetch> {
 	// AWS Secrets Manager クライアントを初期化
 	const sm = new SecretsManagerClient({});
 
-	// EVM 秘密鍵と Solana 秘密鍵を並行取得
-	const [evmSecret, svmSecret] = await Promise.all([
-		sm.send(new GetSecretValueCommand({ SecretId: EVM_SECRET_ARN })),
-		sm.send(new GetSecretValueCommand({ SecretId: SVM_SECRET_ARN })),
-	]);
+	// Solana 秘密鍵を取得
+	const svmSecret = await sm.send(
+		new GetSecretValueCommand({ SecretId: SVM_SECRET_ARN }),
+	);
 
-	if (!evmSecret.SecretString) {
-		throw new Error("EVM private key secret is empty");
-	}
 	if (!svmSecret.SecretString) {
 		throw new Error("Solana private key secret is empty");
 	}
-
-	// EVM signer (viem)
-	const evmSigner = privateKeyToAccount(
-		evmSecret.SecretString as `0x${string}`,
-	);
 
 	// Solana signer (base58 encoded private key → ClientSvmSigner)
 	const svmSigner = await createKeyPairSignerFromBytes(
 		bs58.decode(svmSecret.SecretString),
 	);
 
-	// x402 クライアントに EVM と Solana の両スキームを登録(両方に対応できるように)
+	// x402 クライアントに Solana スキームのみ登録
 	const client = new x402Client();
-	client.register("eip155:*", new ExactEvmScheme(evmSigner));
 	client.register("solana:*", new ExactSvmScheme(svmSigner));
 
 	// fetch を支払い対応にラップしてキャッシュ
